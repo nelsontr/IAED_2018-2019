@@ -3,7 +3,7 @@
 #include <stdlib.h>
 
 /*CONSTANTS*/
-#define MAX_STR 63 /*Constante para strings(como nomes de eventos, Responsaveis, Membros)*/
+#define MAX_STR 64 /*Constante para strings(como nomes de eventos, Responsaveis, Membros)*/
 #define MAX_ROOMS 11
 #define MAX_EVENTS 101
 #define MAX_MEMBERS 4
