@@ -73,6 +73,7 @@ int membro_evento(int data2,int hora,int dura,int room){
                     && sala_ocupada(sala,data2,hora,dura,0))){
                       printf("Impossivel agendar evento %s. Participante %s tem um evento sobreposto.\n",list[0],eve[sala][num_eve].member[y]);
                           flag=1;
+                          strcpy(list[i],"");
                     }
     return flag;
 
@@ -98,11 +99,9 @@ void cria_evento(){
 	    strcpy(eve[sala][num_eve].date,list[1]);
 	    strcpy(eve[sala][num_eve].begin,list[2]);
 	    eve[sala][num_eve].min = atoi(list[3]);
-	    for (i=0;strcmp(list[i+5],"")!=0;i++){
+	    for (i=0;strcmp(list[i+5],"")!=0;i++)
 	        strcpy(eve[sala][num_eve].member[i],list[i+5]);
-	        strcpy(list[i],"");
-    	}
-        eve[sala][num_eve].count_members=i;
+      eve[sala][num_eve].count_members=i;
     }
 }
 
