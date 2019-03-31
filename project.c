@@ -115,10 +115,11 @@ int member_available(int date,int hour,int dura,int room2){
 }
 
 int available(int room,int eve_num,char des[],char date[],char hour[],int dura){
-  if (room_available(room,atoi(date),atoi(hour),dura,eve_num))
-    printf("Impossivel agendar evento %s. Sala%d ocupada.\n",des,room);
-  else if (member_available(atoi(date),atoi(hour),dura,eve_num)==0){
-    return 1;
+  if (room!=0 && eve_num!=0){
+    if (room_available(room,atoi(date),atoi(hour),dura,eve_num))
+      printf("Impossivel agendar evento %s. Sala%d ocupada.\n",des,room);
+    else if (member_available(atoi(date),atoi(hour),dura,eve_num)==0)
+      return 1;
   }
   return 0;
 }
@@ -163,14 +164,14 @@ void change_room(int room, int eve_num,int room2){
 
 /*MAIN PROGRAM*/
 int main(){
-  int room,eve_num,aux;
+  int aux,room,eve_num;
   for (aux=0;aux!=MAX_ROOMS;aux++) count_room[aux]=0;
   while (1){
     input_work();
     aux = search_eve(list[0]), room = aux/1000, eve_num = aux%1000;
     switch(comand){
       case 'a': /*Add an Event*/
-        if available(room,0,list[0],list[1],list[2],atoi(list[3]))
+        if (available(room,0,list[0],list[1],list[2],atoi(list[3])))
           create_event();
         break;
       case 'l': /**/
@@ -183,51 +184,32 @@ int main(){
         if (room!=0 && eve_num!=0)
           remove_event(room,eve_num);
         break;
-      case 'i': /*Troca o inicio de um evento*/
-        /*if (room==0 && num_eve==0)
-        printf("Evento %s inexistente.\n",list[0]);
-        else{
-        for (aux=0;aux<=eve[room][num_eve].count_members;aux++)
-        strcpy(list[aux+5],eve[room][num_eve].member[aux]);
-        if (sala_ocupada(room,atoi(eve[room][num_eve].date),atoi(list[1]),
-        eve[room][num_eve].min,num_eve))
-        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
-        else if (membro_evento(atoi(eve[room][num_eve].date),atoi(list[1]),
-        eve[room][num_eve].min,room)==0)
-        strcpy(eve[room][num_eve].begin,list[1]);
-        }*/
+      case 'i': /*Change the hour of an event*/
+        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
+          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]); /*Updates list to display members of the event searched*/
+        if (available(room,eve_num,eve[room][eve_num].descripction,
+          eve[room][eve_num].date,list[1],eve[room][eve_num].duration))
+            strcpy(eve[room][eve_num].hour,list[1]);
         break;
-      case 't': /*Troca a duracao de um evento*/
-        /*if (room==0 && num_eve==0)
-        printf("Evento %s inexistente.\n",list[0]);
-        else{
-        for (aux=0;aux<=eve[room][num_eve].count_members;aux++)
-        strcpy(list[aux+5],eve[room][num_eve].member[aux]);
-        if (sala_ocupada(room,atoi(eve[room][num_eve].date),atoi(eve[room][num_eve].begin),
-        atoi(list[1]),num_eve))
-        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
-        else if (membro_evento(atoi(eve[room][num_eve].date),atoi(eve[room][num_eve].begin),
-        atoi(list[1]),room)==0)
-        eve[room][num_eve].min=atoi(list[1]);
-        }*/
+      case 't': /*Change the duration of an event*/
+        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
+          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]); /*Updates list to display members of the event searched*/
+        if (available(room,eve_num,eve[room][eve_num].descripction,
+          eve[room][eve_num].date,eve[room][eve_num].hour,list[1]))
+            eve[room][eve_num].duration = atoi(list[1]);
         break;
       case 'm': /*Troca a sala de um evento*/
-        /*if (room==0 && num_eve==0)
-        printf("Evento %s inexistente.\n",list[0]);
-        else{
-        if (sala_ocupada(atoi(list[1]),atoi(eve[room][num_eve].date),atoi(eve[room][num_eve].begin),
-        eve[room][num_eve].min,0))
-        printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],atoi(list[1]));
-        else if (membro_evento(atoi(eve[room][num_eve].date),atoi(eve[room][num_eve].begin),
-        eve[room][num_eve].min,atoi(list[1]))==0)
-        troca_sala(room,num_eve,atoi(list[1]));
-        }*/
+        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
+          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]); /*Updates list to display members of the event searched*/
+        if (available(atoi(list[1]),eve_num,eve[room][eve_num].descripction,
+          eve[room][eve_num].date,eve[room][eve_num].hour,eve[room][eve_num].duration))
+            change_room(room,eve_num,atoi(list[1]));
         break;
       case 'A': /*Adiciona um Membro a um evento*/
-        /*adiciona_membro(room,num_eve,list[1]);*/
+        /*adiciona_membro(room,eve_num,list[1]);*/
         break;
       case 'R': /*Remova um Membro a um evento*/
-        /*remova_membro(room,num_eve,list[1]);*/
+        /*remova_membro(room,eve_num,list[1]);*/
         break;
       case 'x': /*Termina o Programa*/
         exit(0);
