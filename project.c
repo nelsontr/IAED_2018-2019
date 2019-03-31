@@ -43,7 +43,8 @@ int search_eve(char desc[]){
     for (eve_num=0;eve_num<=count_room[room];eve_num++)
       if (strcmp(eve[room][eve_num].descripction,desc)==0)
         return room*1000+eve_num;
-  return 0;
+  printf("Evento %s inexistente.\n",list[0]);
+  return 0; /*Means that there is no event with that descripction*/
 }
 
 void str_list(char str[]){
@@ -66,7 +67,7 @@ void input_work(){
   str_list(str); /*Seperates input and creates a list of it*/
 }
 
-void Bsort(event ev[],int s){/*BubleSort to organize events in rooms*/
+void sort_room(event ev[],int s){/*BubleSort to organize events in rooms*/
   int i, j;
   event temp;
   for (i=1; i<=s ;i++)
@@ -108,6 +109,7 @@ int member_available(int date,int hour,int dura,int room2){
           printf("Participante %s tem um evento sobreposto.\n",
                   eve[room][eve_num].member[y]);
           flag=1;
+          strcpy(list[i],"");
           }
   return flag;
 }
@@ -171,18 +173,15 @@ int main(){
         if available(room,0,list[0],list[1],list[2],atoi(list[3]))
           create_event();
         break;
-      case 'l': /*Organiza Todos os eventos por ordem cornologica*/
+      case 'l': /**/
         break;
       case 's': /*Displays in sort all the events in one room*/
-        /*Bsort(eve[atoi(list[0])],count_room[atoi(list[0])]);
-        print_eve(atoi(list[0]));*/
+        sort_room(eve[atoi(list[0])],count_room[atoi(list[0])]);
+        print_room(atoi(list[0]));
         break;
-      case 'r': /*Retira um evento*/
-        /*printf("sala=%d & num_eve=%d",room,num_eve);
-        if (room==0 && num_eve==0)
-        printf("Evento %s inexistente.\n",list[0]);
-        else
-        retira_eve(room,num_eve);*/
+      case 'r': /*Removes an event*/
+        if (room!=0 && eve_num!=0)
+          remove_event(room,eve_num);
         break;
       case 'i': /*Troca o inicio de um evento*/
         /*if (room==0 && num_eve==0)
