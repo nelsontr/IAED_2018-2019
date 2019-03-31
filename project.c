@@ -1,4 +1,4 @@
-date2#include <stdio.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -49,7 +49,7 @@ int search_eve(char desc[]){
 void str_list(char str[]){
   int i=0;
   char *token;
-  token = strtok(s, ":\n");
+  token = strtok(str, ":\n");
   while( token != NULL ) {
     strcpy(list[i++],token);
     token = strtok(NULL, ":\n");
@@ -57,11 +57,26 @@ void str_list(char str[]){
 }
 
 void input_work(){
+  int aux=0;
+  char str[MAX_STR];
   for (aux=0;aux!=MAX_LIST;aux++) strcpy(list[aux],""); /*Reset to list*/
   comand=getchar();
   if (comand!='x' || comand!='\n') getchar(); /*Remove the space from input line*/
   fgets(str,MAX_INPUT_LINE,stdin);
   str_list(str); /*Seperates input and creates a list of it*/
+}
+
+void Bsort(event ev[],int s){/*BubleSort to organize events in rooms*/
+  int i, j;
+  event temp;
+  for (i=1; i<=s ;i++)
+    for (j=1; j<=s-i ;j++)
+      if (date_int(ev[j].date) >= date_int(ev[j + 1].date)
+          && atoi(ev[j].begin) > atoi(ev[j + 1].begin)){
+          temp = ev[j];
+          ev[j] = ev[j+1];
+          ev[j+1] = temp;
+      }
 }
 
 /*Verification Functions*/
@@ -80,12 +95,12 @@ int room_available(int room,int date2,int hour,int dura,int eve_num){
   return 0;
 }
 
-int membro_evento(int date,int hour,int dura,int room2){
+int member_available(int date,int hour,int dura,int room2){
   int room,eve_num,y,i,flag=0;
   for (room=1;room<=10;room++)
     for (eve_num=1;eve_num<=count_room[room];eve_num++)
       for (y=0;y<=eve[room][eve_num].count_members;y++)
-        for (i=5;i!=9;i++)
+        for (i=5;i!=MAX_LIST;i++)
           if (room!=room2 && strcmp(eve[room][eve_num].member[y],list[i])==0
           && strcmp(eve[room][eve_num].member[y],"")!=0
           && room_ocupada(room,date,hour,dura,0))){
@@ -97,18 +112,64 @@ int membro_evento(int date,int hour,int dura,int room2){
   return flag;
 }
 
+int available(int room,int eve_num,char des[],char date[],char hour[],int dura){
+  if (room_available(room,atoi(date),atoi(hour),dura,eve_num))
+    printf("Impossivel agendar evento %s. Sala%d ocupada.\n",des,room);
+  else if (member_available(atoi(date),atoi(hour),dura,eve_num)==0){
+    return 1;
+  }
+  return 0;
+}
+
+/*Regular Functions*/
+void print_room(int room){
+  int i,y=1;
+  for (i=1;i<=count_room[room];i++,y=1)
+    if (strcmp(eve[room][i].descripction,"")!=0){
+      printf("%s %s %s %d Sala%d %s\n*",eve[room][i].descripction,eve[room][i].date,
+      eve[room][i].begin,eve[room][i].min,room,eve[room][i].member[0]);
+      while (y<eve[room][i].count_members)
+        printf(" %s",eve[room][i].member[y++]);
+      printf("\n");
+    }
+}
+
+void create_event(){
+  int i, room = atoi(list[4]) , eve_num;
+    eve_num = ++count_room[room]; /*Increases the number of events in the room*/
+    strcpy(eve[room][eve_num].descripction,list[0]);
+    strcpy(eve[room][eve_num].date,list[1]);
+    strcpy(eve[room][eve_num].begin,list[2]);
+    eve[room][eve_num].min = atoi(list[3]);
+    for (i=0;strcmp(list[i+5],"")!=0;i++){
+      strcpy(eve[room][eve_num].member[i],list[i+5]);
+      /*strcpy(list[i],"");*/
+    }
+    eve[room][eve_num].count_members=i; /*Except Responsabel*/
+}
+
+void remove_event(int room, int eve_num){
+    for (;eve_num<=count_room[room];eve_num++)
+        eve[room][eve_num]=eve[room][eve_num+1];
+}
+
+void change_room(int room, int eve_num,int room2){
+    eve[room2][++count_room[room2]] = eve[room][eve_num];
+    remove_event(room,eve_num);
+    count_room[room]--;
+}
 
 /*MAIN PROGRAM*/
 int main(){
   int room,eve_num,aux;
-  char comand,str[MAX_STR];
   for (aux=0;aux!=MAX_ROOMS;aux++) count_room[aux]=0;
   while (1){
     input_work();
     aux = search_eve(list[0]), room = aux/1000, eve_num = aux%1000;
     switch(comand){
       case 'a': /*Add an Event*/
-        /*cria_evento();*/
+        if available(room,0,list[0],list[1],list[2],atoi(list[3]))
+          create_event();
         break;
       case 'l': /*Organiza Todos os eventos por ordem cornologica*/
         break;
