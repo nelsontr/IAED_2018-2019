@@ -132,12 +132,9 @@ void retira_eve(int sala, int num_eve){
 }
 
 void adiciona_membro(int sala, int num_eve,char s[]){
-    int len=eve[sala][num_eve].count_members;
-    if (eve[sala][num_eve].count_members<3){
-        strcpy(eve[sala][num_eve].member[len],s);
-        eve[sala][num_eve].count_members++;}
-    else printf("Impossivel remover participante. Evento %s ja tem 3 participantes\n",
-                eve[sala][num_eve].descripction);
+    int i,len=eve[sala][num_eve].count_members;
+    strcpy(eve[sala][num_eve].member[len],s);
+    eve[sala][num_eve].count_members++;
 }
 
 void remova_membro(int sala, int num_eve,char s[]){
@@ -161,7 +158,7 @@ void troca_sala(int sala, int num_eve,int sala2){
 
 /*MAIN PROGRAM*/
 int main(){
-  int room,num_eve,auxd;
+  int room,num_eve,auxd,i,flag=0;
   char comand,str[MAX_STR];
   for (auxd=0;auxd != 11;auxd++) count_room[auxd]=0;
   while (1){
@@ -229,8 +226,26 @@ int main(){
       }
         break;
       case 'A': /*Adiciona um Membro a um evento*/
-        adiciona_membro(room,num_eve,list[1]);
-        break;
+      flag=0;
+      if (room==0 && num_eve==0)
+        printf("Evento %s inexistente.\n",list[0]);
+      else{
+        for (auxd=0;auxd<=eve[room][num_eve].count_members;auxd++)
+          strcpy(list[auxd+5],eve[room][num_eve].member[auxd]);
+        if (eve[room][num_eve].count_members<4){
+          strcpy(list[eve[room][num_eve].count_members+5],list[1]);
+          eve[room][num_eve].count_members++;
+          if (membro_evento(atoi(eve[room][num_eve].date),atoi(eve[room][num_eve].begin),
+                  eve[room][num_eve].min,room)==0)
+                  adiciona_membro(room,num_eve,list[1]);
+                }
+        else{
+          printf("Impossivel adicionar participante. Evento %s ja tem 3 participantes\n",eve[room][num_eve].descripction);
+          eve[room][num_eve].count_members--;
+        }
+}
+
+      break;
       case 'R': /*Remova um Membro a um evento*/
         remova_membro(room,num_eve,list[1]);
         break;
