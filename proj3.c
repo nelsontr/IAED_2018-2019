@@ -73,13 +73,15 @@ int fim(int hora, int dura){
 int sala_ocupada(int sala,int data2,int hora,int dura,int num_eve){
     event even;
     int i,inicio_eve,final,final_eve;
+    /*printf("%d\t%d\n",sala,count_room[sala]);*/
     for (i=1;i<=count_room[sala];i++){
         even = eve[sala][i], inicio_eve=atoi(even.begin);
         final = fim(hora,dura), final_eve = fim(inicio_eve,even.min);
+        /*printf("%d\t%d\t%d\t%d\n",hora,final,inicio_eve,final_eve);*/
         if ((num_eve!=i && atoi(even.date) == data2) && ((hora>inicio_eve && hora<final_eve)
         || (inicio_eve<final && final<final_eve) || (hora>inicio_eve && final<final_eve)
         || (hora<inicio_eve && final>final_eve) || (hora==inicio_eve) || (final==final_eve))){
-            return 1;
+            return i;
         }
     }
     return 0;
@@ -115,9 +117,9 @@ void str_list(char s[]){
 
 void cria_evento(){
     int i, sala = atoi(list[4]) , num_eve;
-    if (sala_ocupada(atoi(list[4]),atoi(list[1]),atoi(list[2]),atoi(list[3]),0))
+    if (sala_ocupada(sala,atoi(list[1]),atoi(list[2]),atoi(list[3]),0))
         printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],sala);
-    else if (membro_evento(atoi(list[1]),atoi(list[2]),atoi(list[3]),0)==0){
+    else if (membro_evento(atoi(list[1]),atoi(list[2]),atoi(list[3]),sala)==0){
         num_eve = ++count_room[sala];
     	strcpy(eve[sala][num_eve].descripction,list[0]);
 	    strcpy(eve[sala][num_eve].date,list[1]);
