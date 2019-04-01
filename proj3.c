@@ -3,11 +3,14 @@
 #include <stdlib.h>
 
 /*CONSTANTS*/
-#define MAX_STR 64 /*Constante para strings(como nomes de eventos, Responsaveis, Membros)*/
+#define MAX_STR 64 /*Constant for strings (like names of Events and Members)*/
 #define MAX_ROOMS 11
 #define MAX_EVENTS 101
+#define MAX_DATE 9
+#define MAX_HOUR 5
 #define MAX_MEMBERS 4
-#define MAX_INPUT_LINE 567 /*63*9*/
+#define MAX_LIST 9
+#define MAX_INPUT_LINE 568 /*Assuming that 63*9 is the limit of input*/
 
 /*Structurs*/
 typedef struct {
@@ -23,9 +26,9 @@ event eve[MAX_ROOMS][MAX_EVENTS];
 /*Functions*/
 
 /*Erro Functions*/
-int date_int(char d[]){/*Transforma '01022020' em 20200201 de modo a comparar*/
-  int date=atoi(d);
-  return (date%10000)*1000 + ((date/10000)%100)*100 + date/1000000;
+int date_int(char d[]){ /*Transforma '01022020' em 20200201 de modo a comparar*/
+  int date=atoi(d), ano=date%10000, mes=((date/10000)%100), dia=date/1000000;
+  return ano*1000 + mes*100 + dia;
 }
 
 void Bsort(event ev[],int s){/*BubleSort to organize events in rooms*/
@@ -132,7 +135,7 @@ void retira_eve(int sala, int num_eve){
 }
 
 void adiciona_membro(int sala, int num_eve,char s[]){
-    int i,len=eve[sala][num_eve].count_members;
+    int len=eve[sala][num_eve].count_members;
     strcpy(eve[sala][num_eve].member[len],s);
     eve[sala][num_eve].count_members++;
 }
@@ -158,7 +161,7 @@ void troca_sala(int sala, int num_eve,int sala2){
 
 /*MAIN PROGRAM*/
 int main(){
-  int room,num_eve,auxd,i,flag=0;
+  int room,num_eve,auxd;
   char comand,str[MAX_STR];
   for (auxd=0;auxd != 11;auxd++) count_room[auxd]=0;
   while (1){
@@ -226,7 +229,6 @@ int main(){
       }
         break;
       case 'A': /*Adiciona um Membro a um evento*/
-      flag=0;
       if (room==0 && num_eve==0)
         printf("Evento %s inexistente.\n",list[0]);
       else{
