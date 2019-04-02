@@ -115,7 +115,7 @@ int hour_check(int room,int eve_num,int hour,int dura,int date2){
   return 0;
 }
 
-int member_available(int data2,int hour,int dura,int room2){
+int member_available(int data2,int hour,int dura,int room2,int escolha){
   int room,eve_num,y,i,flag=0;
   for (room=1;room<=10;room++)
     for (eve_num=1;eve_num<=count_room[room];eve_num++)
@@ -124,7 +124,8 @@ int member_available(int data2,int hour,int dura,int room2){
           if ((room!=room2) && (strcmp(eve[room][eve_num].member[y],list[i])==0
           && strcmp(eve[room][eve_num].member[y],"")!=0
           && hour_check(room,eve_num,hour,dura,data2))){
-            printf("Impossivel agendar evento %s. ",list[0]);
+            if (escolha==0) printf("Impossivel agendar evento %s. ",list[0]);
+            else printf("Impossivel adicionar participante. ");
             printf("Participante %s tem um evento sobreposto.\n",
                     eve[room][eve_num].member[y]);
             flag=1;
@@ -159,7 +160,7 @@ void create_event(){
     int i, room = atoi(list[4]) , eve_num;
     if (room_available(room,atoi(list[1]),atoi(list[2]),atoi(list[3]),0))
         printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
-    else if (member_available(atoi(list[1]),atoi(list[2]),atoi(list[3]),room)==0){
+    else if (member_available(atoi(list[1]),atoi(list[2]),atoi(list[3]),room,0)==0){
         eve_num = ++count_room[room];
     	strcpy(eve[room][eve_num].descripction,list[0]);
 	    strcpy(eve[room][eve_num].date,list[1]);
@@ -213,14 +214,10 @@ void sortMat(){
   }
 }
 
-/*void adiciona_membro(int room, int eve_num,char s[]){
-    int len=eve[room][eve_num].count_members;
-    strcpy(eve[room][eve_num].member[len],s);
-}*/
 
 void remova_membro(int room, int eve_num,char s[]){
     int i,flag=0;
-    for (i=0;i<=eve[room][eve_num].count_members;i++)
+    for (i=1;i<=eve[room][eve_num].count_members;i++)
       if (strcmp(list[1],eve[room][eve_num].member[i])==0)
         flag=1;
     if (eve[room][eve_num].count_members>2){
@@ -234,10 +231,34 @@ void remova_membro(int room, int eve_num,char s[]){
                 eve[room][eve_num].member[1],eve[room][eve_num].descripction);
 }
 
+void adiciona_membro(int room, int eve_num,char s[]){
+  int i,flag=0,auxd=0;
+  if (eve[room][eve_num].count_members==4)
+    printf("Impossivel adicionar participante. Evento %s ja tem 3 participantes.\n",eve[room][eve_num].descripction);
+  else{
+    for (i=1;i<=eve[room][eve_num].count_members;i++)
+    if (strcmp(list[1],eve[room][eve_num].member[i])==0)
+        flag=1;
+
+    if (flag==0){
+      strcpy(eve[room][eve_num].member[eve[room][eve_num].count_members],s);
+      eve[room][eve_num].count_members++;
+      for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
+        strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
+      if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
+              eve[room][eve_num].duration,room,1)==1)
+              remova_membro(room,eve_num,s);
+      }
+  }
+}
+
+
+
+
 
 /*MAIN PROGRAM*/
 int main(){
-  int room,eve_num,auxd,flag=0;
+  int room,eve_num,auxd;
   for (auxd=0;auxd != 11;auxd++) count_room[auxd]=0;
   while (1){
     input_work();
@@ -271,7 +292,7 @@ int main(){
               eve[room][eve_num].duration,eve_num))
               printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
           else if (member_available(atoi(eve[room][eve_num].date),atoi(list[1]),
-              eve[room][eve_num].duration,room)==0)
+              eve[room][eve_num].duration,room,0)==0)
                 strcpy(eve[room][eve_num].hour,list[1]);
         }
         break;
@@ -285,7 +306,7 @@ int main(){
             atoi(list[1]),eve_num))
             printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
         else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-            atoi(list[1]),room)==0)
+            atoi(list[1]),room,0)==0)
             eve[room][eve_num].duration=atoi(list[1]);
           }
         break;
@@ -297,55 +318,17 @@ int main(){
             eve[room][eve_num].duration,0))
             printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],atoi(list[1]));
         else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-                eve[room][eve_num].duration,atoi(list[1]))==0)
+                eve[room][eve_num].duration,atoi(list[1]),0)==0)
         change_room(room,eve_num,atoi(list[1]));
       }
         break;
       case 'A': /*Adiciona um Membro a um evento*/
-      flag=0;
-      if (room==0 && eve_num==0)
-        printf("Evento %s inexistente.\n",list[0]);
-      else{;
-        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
-          if (strcmp(list[1],eve[room][eve_num].member[auxd])==0)
-            flag=1;
-      if (flag!=1){
-        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
-          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
-        if (eve[room][eve_num].count_members<=4){
-          printf("\t%d\t",auxd);
-          strcpy(eve[room][eve_num].member[auxd-1],list[1]);
-          eve[room][eve_num].count_members++;
-          if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-                  eve[room][eve_num].duration,room)==1){
-                  strcpy(eve[room][eve_num].member[auxd-1],"");
-                  printf("list[auxd+6] - %s",list[1]);
-                  eve[room][eve_num].count_members--;
-          }
-        }
-        else
-          printf("Impossivel adicionar participante. Evento %s ja tem 3 participantes\n",eve[room][eve_num].descripction);
-
-        }}
-      /*flag=0;
-      if (room==0 && eve_num==0)
-        printf("Evento %s inexistente.\n",list[0]);
-      else{
-        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
-          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
-        if (eve[room][eve_num].count_members<4){
-          strcpy(list[eve[room][eve_num].count_members+5],list[1]);
-          eve[room][eve_num].count_members++;
-          if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-                  eve[room][eve_num].duration,room)==0)
-                  adiciona_membro(room,eve_num,list[1]);
-                }
+        if (room==0 && eve_num==0)
+          printf("Evento %s inexistente.\n",list[0]);
         else{
-          printf("Impossivel adicionar participante. Evento %s ja tem 3 participantes\n",eve[room][eve_num].descripction);
-          eve[room][eve_num].count_members--;
+          adiciona_membro(room,eve_num,list[1]);
         }
-}
-      */break;
+      break;
       case 'R': /*Remova um Membro a um evento*/
         if (room==0 && eve_num==0)
           printf("Evento %s inexistente.\n",list[0]);
