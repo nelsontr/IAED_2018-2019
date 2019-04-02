@@ -31,7 +31,7 @@ event temp[MAX_ROOMS*MAX_EVENTS];
 /*Erro Functions*/
 int date_int(char d[]){ /*Transforma '01022020' em 20200201 de modo a comparar*/
   int date=atoi(d), ano=date%10000, mes=((date/10000)%100), dia=date/1000000;
-  return ano*1000 + mes*100 + dia;
+  return ano*10000 + mes*100 + dia;
 }
 
 int end_hour(int hour, int dura){
@@ -75,12 +75,12 @@ void Bsort(event ev[],int s){ /*BubleSort to organize events in rooms*/
   event tempo;
   for (i = 1; i <= s; i++)
     for (j = 1; j <= s-i; j++)
-      if (date_int(ev[j].date) >= date_int(ev[j + 1].date) &&
-          atoi(ev[j].hour) > atoi(ev[j + 1].hour)){
+      if ((date_int(ev[j].date) > date_int(ev[j + 1].date)) || ((date_int(ev[j].date) == date_int(ev[j + 1].date) &&
+      atoi(ev[j].hour) > atoi(ev[j + 1].hour)))){
         tempo = ev[j];
         ev[j] = ev[j + 1];
         ev[j + 1] = tempo;
-  }
+  }  
 }
 
 /*Verification Functions*/
@@ -161,6 +161,7 @@ void create_event(){
       for (i=0;strcmp(list[i+5],"")!=0;i++)
 	        strcpy(eve[room][eve_num].member[i],list[i+5]);
       eve[room][eve_num].count_members=i;
+      Bsort(eve[room],count_room[room]);
     }
 }
 
@@ -172,7 +173,7 @@ void remove_event(int room, int eve_num){
 
 void change_room(int room, int eve_num,int room2){
     eve[room2][++count_room[room2]] = eve[room][eve_num];
-    eve[room2][++count_room[room2]].room=room2;
+    eve[room2][count_room[room2]].room=room2;
     remove_event(room,eve_num);
 }
 
@@ -187,15 +188,17 @@ void sortMat(){
         temp[k] = eve[i][j];
         k++;}
 
-  for ( i = 1; i <= k; i++)
-    for ( j = 1; j <= k; j++)
-      if (date_int(temp[j].date) >= date_int(temp[j + 1].date) &&
-          atoi(temp[j].hour) > atoi(temp[j + 1].hour)){
-        tempo = temp[j];
-        temp[j] = temp[j + 1];
-        temp[j + 1] = tempo;}
+  for ( i = 1; i < k; i++)
+    for ( j = 1; j < k-i; j++)
+    if ((date_int(temp[j].date) > date_int(temp[j + 1].date)) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) > atoi(temp[j + 1].hour))) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) == atoi(temp[j + 1].hour) && temp[j].room > temp[j+1].room))){
+      tempo = temp[j];
+      temp[j] = temp[j + 1];
+      temp[j + 1] = tempo;}
 
-  for (i=1;i<=100;i++){
+
+  for (i=1;i<=k;i++){
     if (temp[i].duration!=0){
     y=1;
     printf("%s %s %s %d Sala%d %s\n*",temp[i].descripction,temp[i].date,
@@ -213,11 +216,13 @@ void remova_membro(int room, int eve_num,char s[]){
       if (strcmp(list[1],eve[room][eve_num].member[i])==0)
         flag=1;
     if (eve[room][eve_num].count_members>2){
-      for (i=1;strcmp(eve[room][eve_num].member[i],s)!=0;i++); /*Descobrir em que posição o membro esta*/
-      for (;i<eve[room][eve_num].count_members;i++)
+      for (i=1;i!=eve[room][eve_num].count_members && strcmp(eve[room][eve_num].member[i],s)!=0;i++); /*Descobrir em que posição o membro esta*/
+      if (i<eve[room][eve_num].count_members){
+        for (;i<eve[room][eve_num].count_members;i++)
         strcpy(eve[room][eve_num].member[i],eve[room][eve_num].member[i+1]);
       eve[room][eve_num].count_members--;
       }
+    }
     else if (flag==1)
         printf("Impossivel remover participante. Participante %s e o unico participante no evento %s.\n",
                 eve[room][eve_num].member[1],eve[room][eve_num].descripction);
@@ -264,7 +269,6 @@ int main(){
         sortMat();
         break;
       case 's': /*Displays in sort all the events in one room*/
-        Bsort(eve[atoi(list[0])],count_room[atoi(list[0])]);
         print_eve(atoi(list[0]));
         break;
       case 'r': /*Retira um evento*/
