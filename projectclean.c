@@ -3,15 +3,15 @@
 #include <stdlib.h>
 
 /*CONSTANTS*/
-#define MAX_STR 64 /*Constant for strings (like names of Events and Members)*/
-#define MAX_ROOMS 11
-#define MAX_EVENTS 101
-#define MAX_DATE 9
-#define MAX_HOUR 5
-#define MAX_MEMBERS 4
-#define MAX_DURATION 1440
-#define MAX_LIST 9
-#define MAX_INPUT_LINE 568 /*Assuming that 63*9 is the limit of input*/
+#define MAX_STR 64  /*Constant for strings (like names of Events and Members)*/
+#define MAX_ROOMS 11        /*Rooms from 1 up to 10*/
+#define MAX_EVENTS 101      /*Events from 1 up to 100*/
+#define MAX_DATE 9          /*exemple: 20062019 - 8 char +\0*/
+#define MAX_HOUR 5          /*exemple: 1005 - 4 char +\0*/
+#define MAX_MEMBERS 4       /*1 Responsabel + 3 Members*/
+#define MAX_DURATION 1440   /*Duration from 1 up to 1440*/
+#define MAX_LIST 9          /*At max, our input is gonna be divided by 9*/
+#define MAX_INPUT_LINE 568  /*Assuming that 63*9 is the limit of input*/
 
 /*Structurs*/
 typedef struct {
@@ -21,24 +21,29 @@ typedef struct {
 } event;
 
 /*Global Variables*/
-int count_room[MAX_ROOMS];
-char comand,list[MAX_LIST][MAX_STR];
-event eve[MAX_ROOMS][MAX_EVENTS];
+int count_room[MAX_ROOMS];            /*Counter to know many events are in a room*/
+char comand,list[MAX_LIST][MAX_STR];  /*Comand that will be used in switch (in main)*/
+event eve[MAX_ROOMS][MAX_EVENTS];     /*Variable to use as */
 event temp[MAX_ROOMS*MAX_EVENTS];
 
-/*Functions*/
+/*--------Functions--------*/
 
-/*Erro Functions*/
-int date_int(char d[]){ /*Transforma '01022020' em 20200201 de modo a comparar*/
-  int date=atoi(d), ano=date%10000, mes=((date/10000)%100), dia=date/1000000;
-  return ano*10000 + mes*100 + dia;
+/*----Erro Functions----*/
+
+/*It takes a date in string format (ex. '01022020') and returns the inverse in
+int format (ex. 20200201)*/
+int date_int(char d[]){
+  int date=atoi(d), year=date%10000, month=((date/10000)%100), day=date/1000000;
+  return year*10000 + month*100 + day;
 }
 
+/*It calculates the end time of an event*/
 int end_hour(int hour, int dura){
     int end=hour+dura , hours=(end/100)+(end%100)/60 , min=(end%100)%60;
     return hours*100+min;
 }
 
+/*It searches where is the event with the exact same description*/
 int search_eve(char desc[]){
   int room,eve_num;
   for (room=0;room<=10;room++)
@@ -48,6 +53,7 @@ int search_eve(char desc[]){
   return 0;
 }
 
+/*It seperates the input and adds it to the global variable "list"*/
 void str_list(char s[]){
   int i=0;
   char *token;
@@ -58,6 +64,7 @@ void str_list(char s[]){
   }
 }
 
+/*Receives the input and sends it to str_list*/
 void input_work(){
   int auxd=0;
   char line[MAX_INPUT_LINE];
@@ -70,7 +77,8 @@ void input_work(){
   }
 }
 
-void Bsort(event ev[],int s){ /*BubleSort to organize events in rooms*/
+/*Sorts the events of a room. It uses BubleSort.*/
+void Bsort(event ev[],int s){
   int i, j;
   event tempo;
   for (i = 1; i <= s; i++)
@@ -80,10 +88,12 @@ void Bsort(event ev[],int s){ /*BubleSort to organize events in rooms*/
         tempo = ev[j];
         ev[j] = ev[j + 1];
         ev[j + 1] = tempo;
-  }  
+  }
 }
 
-/*Verification Functions*/
+/*----Verification Functions----*/
+
+/*Conditions to verify if the room is available*/
 int hour_check(int room,int eve_num,int hour,int dura,int date2,int eve_num2){
   event even;
   int eve_begin,end,eve_end;
@@ -97,15 +107,16 @@ int hour_check(int room,int eve_num,int hour,int dura,int date2,int eve_num2){
   return 0;
 }
 
+/*Verifies if an event doesn't go on top of other that already existes*/
 int room_available(int room,int date2,int hour,int dura,int eve_num){
   int i=1;
-  for (i=1;i<=count_room[room];i++){
+  for (i=1;i<=count_room[room];i++)
     if (hour_check(room,i,hour,dura,date2,eve_num))
         return 1;
-    }
   return 0;
 }
 
+/*Verifies if a member as an event in another room at the same time*/
 int member_available(int data2,int hour,int dura,int room2,int escolha){
   int room,eve_num,y,i,flag=0;
   for (room=1;room<=10;room++)
@@ -133,10 +144,13 @@ int member_available(int data2,int hour,int dura,int room2,int escolha){
   return 0;
 }*/
 
-/*Regular Functions*/
+/*----Regular Functions----*/
+
+/*Print the events of a N room*/
 void print_eve(int N){
   int i,y;
-  for (i=1;i<=count_room[N];i++)
+  Bsort(eve[N],count_room[N]);
+  for ( i=1 ; i<=count_room[N] ; i++ )
     if (strcmp(eve[N][i].descripction,"")!=0){
       y=1;
       printf("%s %s %s %d Sala%d %s\n*",eve[N][i].descripction,eve[N][i].date,
@@ -147,6 +161,7 @@ void print_eve(int N){
     }
 }
 
+/*Creates an event*/
 void create_event(){
     int i, room = atoi(list[4]) , eve_num;
     if (room_available(room,atoi(list[1]),atoi(list[2]),atoi(list[3]),0))
@@ -161,16 +176,17 @@ void create_event(){
       for (i=0;strcmp(list[i+5],"")!=0;i++)
 	        strcpy(eve[room][eve_num].member[i],list[i+5]);
       eve[room][eve_num].count_members=i;
-      Bsort(eve[room],count_room[room]);
     }
 }
 
+/*Removes an event*/
 void remove_event(int room, int eve_num){
     for (;eve_num<=count_room[room];eve_num++)
         eve[room][eve_num]=eve[room][eve_num+1];
     count_room[room]--;
 }
 
+/*Changes the room of an event*/
 void change_room(int room, int eve_num,int room2){
     eve[room2][++count_room[room2]] = eve[room][eve_num];
     eve[room2][count_room[room2]].room=room2;
@@ -256,84 +272,83 @@ void adiciona_membro(int room, int eve_num,char s[]){
 /*MAIN PROGRAM*/
 int main(){
   int room,eve_num,auxd;
-  for (auxd=0;auxd != 11;auxd++) count_room[auxd]=0;
+  for (auxd=0;auxd != 11;auxd++) count_room[auxd]=0; /*Initializes event counter with the value of 0*/
   while (1){
     input_work();
-    if (comand!='a')
+    if ( comand!='a' && comand!='l' && comand!='s' )
       auxd = search_eve(list[0]), room = auxd/1000,eve_num = auxd%1000;
     switch(comand){
       case 'a': /*Add an Event*/
         create_event();
         break;
-      case 'l': /*Organiza Todos os eventos por ordem cornologica*/
+      case 'l': /*Displays all events, sorted by date,hour and room*/
         sortMat();
         break;
       case 's': /*Displays in sort all the events in one room*/
         print_eve(atoi(list[0]));
         break;
-      case 'r': /*Retira um evento*/
-        /*printf("room=%d & eve_num=%d",room,eve_num);*/
+      case 'r': /*Removes an  event*/
         if (room==0 && eve_num==0)
-        printf("Evento %s inexistente.\n",list[0]);
+          printf("Evento %s inexistente.\n",list[0]);
         else
-        remove_event(room,eve_num);
+          remove_event(room,eve_num);
         break;
-      case 'i': /*Troca o inicio de um evento*/
+      case 'i': /*Changes the begin of an event*/
         if (room==0 && eve_num==0)
           printf("Evento %s inexistente.\n",list[0]);
         else{
           for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
             strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
           if (room_available(room,atoi(eve[room][eve_num].date),atoi(list[1]),
-              eve[room][eve_num].duration,eve_num))
-              printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
+          eve[room][eve_num].duration,eve_num))
+            printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
           else if (member_available(atoi(eve[room][eve_num].date),atoi(list[1]),
-              eve[room][eve_num].duration,room,0)==0)
-                strcpy(eve[room][eve_num].hour,list[1]);
+          eve[room][eve_num].duration,room,0)==0)
+            strcpy(eve[room][eve_num].hour,list[1]);
         }
         break;
       case 't': /*Troca a duracao de um evento*/
-      if (room==0 && eve_num==0)
-        printf("Evento %s inexistente.\n",list[0]);
-      else if (atoi(list[1])>=1 && atoi(list[1])<=MAX_DURATION
-          && atoi(list[1])!=eve[room][eve_num].duration){
-        for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
-          strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
-        if (room_available(room,atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-            atoi(list[1]),eve_num))
+        if (room==0 && eve_num==0)
+          printf("Evento %s inexistente.\n",list[0]);
+        else if (atoi(list[1])>=1 && atoi(list[1])<=MAX_DURATION
+        && atoi(list[1])!=eve[room][eve_num].duration){
+          for (auxd=0;auxd<=eve[room][eve_num].count_members;auxd++)
+            strcpy(list[auxd+5],eve[room][eve_num].member[auxd]);
+          if (room_available(room,atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
+          atoi(list[1]),eve_num))
             printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
-        else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-            atoi(list[1]),room,0)==0)
-            eve[room][eve_num].duration=atoi(list[1]);
-          }
-        break;
-      case 'm': /*Troca a room de um evento*/
-      if (room==0 && eve_num==0)
-        printf("Evento %s inexistente.\n",list[0]);
-      else{
-        if (room!=atoi(list[1])){
-          if (room_available(atoi(list[1]),atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-              eve[room][eve_num].duration,0))
-              printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],atoi(list[1]));
           else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-                  eve[room][eve_num].duration,atoi(list[1]),0)==0)
-          change_room(room,eve_num,atoi(list[1]));}
-      }
+          atoi(list[1]),room,0)==0)
+            eve[room][eve_num].duration=atoi(list[1]);
+        }
         break;
-      case 'A': /*Adiciona um Membro a um evento*/
+      case 'm': /*Changes the room of an event*/
         if (room==0 && eve_num==0)
           printf("Evento %s inexistente.\n",list[0]);
         else{
-          adiciona_membro(room,eve_num,list[1]);
+          if (room!=atoi(list[1])){
+            if (room_available(atoi(list[1]),atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
+            eve[room][eve_num].duration,0))
+              printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],atoi(list[1]));
+            else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
+            eve[room][eve_num].duration,atoi(list[1]),0)==0)
+              change_room(room,eve_num,atoi(list[1]));
+          }
         }
-      break;
-      case 'R': /*Remova um Membro a um evento*/
+        break;
+      case 'A': /*Adds a Member to an event*/
+        if (room==0 && eve_num==0)
+          printf("Evento %s inexistente.\n",list[0]);
+        else
+          adiciona_membro(room,eve_num,list[1]);
+        break;
+      case 'R': /*Removes a Member to a event*/
         if (room==0 && eve_num==0)
           printf("Evento %s inexistente.\n",list[0]);
         else
           remova_membro(room,eve_num,list[1]);
         break;
-      case 'x': /*Termina o Programa*/
+      case 'x': /*Exits the Program*/
         exit(0);
         break;
     }
