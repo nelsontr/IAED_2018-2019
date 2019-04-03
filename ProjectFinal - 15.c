@@ -82,13 +82,13 @@ void input_work(){
 /*Turns a matrix in a vector*/
 int matrix_to_vector(){
   int i,j,k=1;
-  for ( i = 1; i <= 10; i++)
+  for ( i = 1; i <= 10; i++){
     for ( j = 1; j <= count_room[i]; j++)
       if (eve[i][j].duration!=0){
       temp[k] = eve[i][j];
       k++;
       }
-  return k;
+  }
 }
 
 
@@ -192,7 +192,8 @@ void print_room(int room){
 
 /*Print all events*/
 void print_all(){
-  int i=1,k=matrix_to_vector();
+  int i=1,y=1,k;
+  matrix_to_vector();
   insertionSort(temp,k);
   for (i=1;i<=k;i++)
     print_eve(temp[i].room,i);
