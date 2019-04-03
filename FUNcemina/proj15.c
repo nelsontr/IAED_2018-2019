@@ -155,8 +155,8 @@ void insertionSort(event arr[], int n)
         key = arr[i];
         j = i - 1;
         while (j >= 0 && ((date_int(arr[j].date) > date_int(key.date)) || ((date_int(arr[j].date) == date_int(key.date) &&
-        atoi(arr[j].hour) > atoi(key.hour))) || ((date_int(arr[j].date) == date_int(arr[j + 1].date) &&
-        atoi(arr[j].hour) == atoi(arr[j + 1].hour) && arr[j].room > arr[j+1].room)))){
+        atoi(arr[j].hour) > atoi(key.hour))) /*|| ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+        atoi(temp[j].hour) == atoi(temp[j + 1].hour) && temp[j].room > temp[j+1].room))*/)){
             arr[j + 1] = arr[j];
             j = j - 1;
         }
@@ -210,6 +210,15 @@ void sortMat(){
         k++;}
 
   insertionSort(temp,k);
+  /*for ( i = 1; i < k; i++)
+    for ( j = 1; j < k-i; j++)
+    if ((date_int(temp[j].date) > date_int(temp[j + 1].date)) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) > atoi(temp[j + 1].hour))) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) == atoi(temp[j + 1].hour) && temp[j].room > temp[j+1].room))){
+      tempo = temp[j];
+      temp[j] = temp[j + 1];
+      temp[j + 1] = tempo;}
+*/
 
   for (i=1;i<=k;i++){
     if (temp[i].duration!=0){

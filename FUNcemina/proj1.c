@@ -69,8 +69,8 @@ void input_work(){
     str_list(line);
   }
 }
-/*
-void Bsort(event ev[],int s){ BubleSort to organize events in rooms
+
+void Bsort(event ev[],int s){ /*BubleSort to organize events in rooms*/
   int i, j;
   event tempo;
   for (i = 1; i <= s; i++)
@@ -81,7 +81,7 @@ void Bsort(event ev[],int s){ BubleSort to organize events in rooms
         ev[j] = ev[j + 1];
         ev[j + 1] = tempo;
   }
-}*/
+}
 
 /*Verification Functions*/
 int hour_check(int room,int eve_num,int hour,int dura,int date2,int eve_num2){
@@ -147,23 +147,6 @@ void print_eve(int N){
     }
 }
 
-void insertionSort(event arr[], int n)
-{
-  int i,j;
-  event key;
-    for (i = 1; i <= n; i++) {
-        key = arr[i];
-        j = i - 1;
-        while (j >= 0 && ((date_int(arr[j].date) > date_int(key.date)) || ((date_int(arr[j].date) == date_int(key.date) &&
-        atoi(arr[j].hour) > atoi(key.hour))) || ((date_int(arr[j].date) == date_int(arr[j + 1].date) &&
-        atoi(arr[j].hour) == atoi(arr[j + 1].hour) && arr[j].room > arr[j+1].room)))){
-            arr[j + 1] = arr[j];
-            j = j - 1;
-        }
-        arr[j + 1] = key;
-    }
-}
-
 void create_event(){
     int i, room = atoi(list[4]) , eve_num;
     if (room_available(room,atoi(list[1]),atoi(list[2]),atoi(list[3]),0))
@@ -178,7 +161,6 @@ void create_event(){
       for (i=0;strcmp(list[i+5],"")!=0;i++)
 	        strcpy(eve[room][eve_num].member[i],list[i+5]);
       eve[room][eve_num].count_members=i;
-      insertionSort(eve[room],eve_num);
     }
 }
 
@@ -186,22 +168,18 @@ void remove_event(int room, int eve_num){
     for (;eve_num<=count_room[room];eve_num++)
         eve[room][eve_num]=eve[room][eve_num+1];
     count_room[room]--;
-
 }
 
 void change_room(int room, int eve_num,int room2){
     eve[room2][++count_room[room2]] = eve[room][eve_num];
     eve[room2][count_room[room2]].room=room2;
-    insertionSort(eve[room2],count_room[room2]);
     remove_event(room,eve_num);
-
 }
-
-
 
 
 /*AINDA POR VER*/
 void sortMat(){
+  event tempo;
   int i,j,k=1,y = 1;
   for ( i = 1; i <= 10; i++)
     for ( j = 1; j <= count_room[i]; j++)
@@ -209,7 +187,15 @@ void sortMat(){
         temp[k] = eve[i][j];
         k++;}
 
-  insertionSort(temp,k);
+  for ( i = 1; i < k; i++)
+    for ( j = 1; j < k-i; j++)
+    if ((date_int(temp[j].date) > date_int(temp[j + 1].date)) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) > atoi(temp[j + 1].hour))) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) == atoi(temp[j + 1].hour) && temp[j].room > temp[j+1].room))){
+      tempo = temp[j];
+      temp[j] = temp[j + 1];
+      temp[j + 1] = tempo;}
+
 
   for (i=1;i<=k;i++){
     if (temp[i].duration!=0){
@@ -282,6 +268,7 @@ int main(){
         sortMat();
         break;
       case 's': /*Displays in sort all the events in one room*/
+        Bsort(eve[atoi(list[0])],count_room[atoi(list[0])]);
         print_eve(atoi(list[0]));
         break;
       case 'r': /*Retira um evento*/
@@ -301,10 +288,8 @@ int main(){
               eve[room][eve_num].duration,eve_num))
               printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
           else if (member_available(atoi(eve[room][eve_num].date),atoi(list[1]),
-              eve[room][eve_num].duration,room,0)==0){
+              eve[room][eve_num].duration,room,0)==0)
                 strcpy(eve[room][eve_num].hour,list[1]);
-                insertionSort(eve[room],count_room[room]);}
-
         }
         break;
       case 't': /*Troca a duracao de um evento*/
@@ -318,10 +303,8 @@ int main(){
             atoi(list[1]),eve_num))
             printf("Impossivel agendar evento %s. Sala%d ocupada.\n",list[0],room);
         else if (member_available(atoi(eve[room][eve_num].date),atoi(eve[room][eve_num].hour),
-            atoi(list[1]),room,0)==0){
+            atoi(list[1]),room,0)==0)
             eve[room][eve_num].duration=atoi(list[1]);
-            insertionSort(eve[room],count_room[room]);}
-
           }
         break;
       case 'm': /*Troca a room de um evento*/
