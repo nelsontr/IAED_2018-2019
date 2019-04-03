@@ -81,7 +81,7 @@ void input_work(){
 
 /*Turns a matrix in a vector*/
 int matrix_to_vector(){
-  int i,j,k=1,y = 1;
+  int i,j,k=1;
   for ( i = 1; i <= 10; i++)
     for ( j = 1; j <= count_room[i]; j++)
       if (eve[i][j].duration!=0){
@@ -172,6 +172,7 @@ int member_available(int data2,int hour,int dura,int room2,int escolha){
 
 /*Print one event*/
 void print_eve(int N, int i){
+  int y = 1;
   if (strcmp(eve[N][i].descripction,"")!=0){
     y=1;
     printf("%s %s %s %d Sala%d %s\n*",eve[N][i].descripction,eve[N][i].date,
@@ -179,11 +180,12 @@ void print_eve(int N, int i){
     while (y<eve[N][i].count_members)
       printf(" %s",eve[N][i].member[y++]);
     printf("\n");
+  }
 }
 
 /*Print the events of a N room*/
 void print_room(int room){
-  int i,y;
+  int i=1;
   for (i=1;i<=count_room[room];i++)
     print_eve(room,i);
 }
@@ -247,22 +249,25 @@ void remove_member(int room, int eve_num,char s[]){
     for (i=1;i!=eve[room][eve_num].count_members /*Finds were the person is in the event (Finds the position)*/
     && strcmp(eve[room][eve_num].member[i],s)!=0;i++);
     if (i<eve[room][eve_num].count_members){
-      for (;i<eve[room][eve_num].count_members;i++)
+      for (;i<eve[room][eve_num].count_members;i++){
         strcpy(eve[room][eve_num].member[i],eve[room][eve_num].member[i+1]);
         eve[room][eve_num].count_members--;
+      }
     }
   }
-  else if (flag==1)
+  else if (flag==1){
     printf("Impossivel remover participante. ");
     printf("Participante %s e o unico participante no evento %s.\n",
             eve[room][eve_num].member[1],eve[room][eve_num].descripction);
+  }
 }
 
 void add_member(int room, int eve_num,char s[]){
   int i,flag=0,auxd=0;
-  if (eve[room][eve_num].count_members==4)
-    printf("Impossivel adicionar participante. "
+  if (eve[room][eve_num].count_members==4){
+    printf("Impossivel adicionar participante. ");
     printf("Evento %s ja tem 3 participantes.\n",eve[room][eve_num].descripction);
+  }
   else{
     for (i=1;i<=eve[room][eve_num].count_members;i++)
       if (strcmp(list[1],eve[room][eve_num].member[i])==0)
