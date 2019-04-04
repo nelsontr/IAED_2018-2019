@@ -2,17 +2,19 @@
 #include <string.h>
 #include <stdlib.h>
 
-int end_hour(int hour, int dura){
-
-    int  min=(hour%100+dura%60), hours=(hour/100)+(dura/60)+min/60;
-    return hours*100+min%60;
-}
 
 int main(){
-
   int a,d;
-  scanf("%d",&a);
-  scanf("%d",&d);
+  int m[100][100];
+  while(1){
+    scanf("%d",&a);
+    scanf("%d",&d);
+    m[a][d]=1
+    if (a==3)
+      break;
+  }
+  c.vector(m)
+
 
   printf("%d\n",end_hour(a,d));
   return 0;
