@@ -23,8 +23,8 @@ typedef struct {
 /*Global Variables*/
 int count_room[MAX_ROOMS];            /*Counter to know many events are in a room*/
 char comand,list[MAX_LIST][MAX_STR];  /*Comand that will be used in switch (in main)*/
-event eve[MAX_ROOMS][MAX_EVENTS];     /*Variable to use as */
-event temp[MAX_ROOMS*MAX_EVENTS];
+event eve[MAX_ROOMS][MAX_EVENTS];     /*Variable to save events*/
+event temp[MAX_ROOMS*MAX_EVENTS];     /*Variable only used only to sort the matrix above*/
 
 
 /*--------Functions--------*/
@@ -70,7 +70,7 @@ void str_list(char s[]){
 void input_work(){
   int auxd=0;
   char line[MAX_INPUT_LINE];
-  for (auxd=0;auxd != 10;auxd++) strcpy(list[auxd],"");
+  for (auxd=0;auxd != 10;auxd++) strcpy(list[auxd],""); /*Puts the vector of strings with "" */
   comand=getchar();
   if (comand!='x' && comand!='l' && comand!='\n'){
     getchar();
@@ -80,12 +80,12 @@ void input_work(){
 }
 
 /*Turns a matrix in a vector*/
-int matrix_to_vector(event *temp){
+int matrix_to_vector(event temp){
   int i,j,k=1;
   for ( i = 1; i <= 10; i++){
     for ( j = 1; j <= count_room[i]; j++)
       /*if (strcmp(eve[i][j].descripction,"")!=0){*/
-      *temp[k++] = eve[i][j];
+      temp[k++] = eve[i][j];
     /*}*/
   }
   return --k;
@@ -95,19 +95,19 @@ int matrix_to_vector(event *temp){
 /*Sorts the events of a room.*/
 void insertionSort(event ev[], int n){
   int i,j;
-  event temp;
+  event eve_aux;
   for (i = 1; i <= n; i++) {
-    temp = ev[i];
-    j = i - 1;
-    while (j >= 0 && ((date_int(ev[j].date) > date_int(key.date)) ||
-      ((date_int(ev[j].date) == date_int(key.date) &&
-        atoi(ev[j].hour) > atoi(key.hour))) ||
-      ((date_int(ev[j].date) == date_int(key.date) &&
-      atoi(ev[j].hour) == atoi(key.hour) && ev[j].room > key.room)))){
-        ev[j + 1] = ev[j];
+    eve_aux = ev[i], j = i - 1;
+
+    while (j >= 0 && ((date_int(ev[j].date) > date_int(eve_aux.date)) ||
+      ((date_int(ev[j].date) == date_int(eve_aux.date) &&
+        atoi(ev[j].hour) > atoi(eve_aux.hour))) ||
+      ((date_int(ev[j].date) == date_int(eve_aux.date) &&
+      atoi(ev[j].hour) == atoi(eve_aux.hour) && ev[j].room > eve_aux.room)))){
+        ev[j+1] = ev[j];
         j--;
       }
-    ev[j + 1] = key;
+    ev[j+1] = eve_aux;
   }
 }
 
@@ -128,7 +128,7 @@ int hour_check(int room,int eve_num,int hour,int dura,int date2,int eve_num2){
   return 0;
 }
 
-/*Verifies if an event doesn't go on top of other that already existes*/
+/*Verifies if an event doesn't go on top of other that already exists*/
 int room_available(int room,int date2,int hour,int dura,int eve_num){
   int i=1;
   for (i=1;i<=count_room[room];i++){
@@ -145,26 +145,29 @@ int member_available(int data2,int hour,int dura,int room2,int escolha){
     for (eve_num=1;eve_num<=count_room[room];eve_num++)
       for (y=0;y<=eve[room][eve_num].count_members;y++)
         for (i=5;i!=10;i++)
+
           if ((room!=room2) && (strcmp(eve[room][eve_num].member[y],list[i])==0
           && strcmp(eve[room][eve_num].member[y],"")!=0
           && hour_check(room,eve_num,hour,dura,data2,0))){
-            if (escolha==0) printf("Impossivel agendar evento %s. ",list[0]);
-            else printf("Impossivel adicionar participante. ");
+
+            if (escolha==0)
+              printf("Impossivel agendar evento %s. ",list[0]);
+            else
+              printf("Impossivel adicionar participante. ");
             printf("Participante %s tem um evento sobreposto.\n",
                     eve[room][eve_num].member[y]);
             flag=1;
-            strcpy(list[i],"");
+            strcpy(list[i],""); /*If this line didn't apeared, we would have the
+                                same error IF the member was in another event*/
           }
   return flag;
 }
 
 int available(int room,int eve_num,char des[],char date[],char hour[],int dura,int escolha){
-  if (atoi(hour)>=0 && atoi(hour)<=2359 && dura>=1 && dura<=1440 && room>0 && room<11){
     if (room_available(room,atoi(date),atoi(hour),dura,eve_num))
       printf("Impossivel agendar evento %s. Sala%d ocupada.\n",des,room);
     else if (member_available(atoi(date),atoi(hour),dura,room,escolha)==0)
       return 1;
-  }
   return 0;
 }
 
@@ -175,9 +178,9 @@ int available(int room,int eve_num,char des[],char date[],char hour[],int dura,i
 void print_eve(event ev[], int i){
   int y = 1;
   if (strcmp(ev[i].descripction,"")!=0){
-    y=1;
     printf("%s %s %s %d Sala%d %s\n*",ev[i].descripction,ev[i].date,
     ev[i].hour,ev[i].duration,ev[i].room,ev[i].member[0]);
+
     while (y<ev[i].count_members)
       printf(" %s",ev[i].member[y++]);
     printf("\n");
@@ -193,8 +196,8 @@ void print_room(int room){
 
 /*Print all events*/
 void print_all(){
-  event temp
-  int i,k=(matrix_to_vector(&temp)-1);
+  event temp;
+  int i,k=(matrix_to_vector(temp));
   insertionSort(temp,k);
   for (i=1;i<=k;i++)
     print_eve(temp,i);
@@ -203,6 +206,7 @@ void print_all(){
 /*Creates an event*/
 void create_event(){
   int i, room = atoi(list[4]) , eve_num= ++count_room[room];
+
   if (available(room,eve_num,list[0],list[1],list[2],atoi(list[3]),0)){
     strcpy(eve[room][eve_num].descripction,list[0]);
     strcpy(eve[room][eve_num].date,list[1]);
@@ -211,12 +215,12 @@ void create_event(){
     eve[room][eve_num].room = room;
     for (i=0;strcmp(list[i+5],"")!=0;i++)
       strcpy(eve[room][eve_num].member[i],list[i+5]);
-    eve[room][eve_num].count_members=i; /*if all members are added, then count_members=4*/
+    eve[room][eve_num].count_members=i; /*if all members are added, then count_members = 4*/
     insertionSort(eve[room],eve_num);
     }
   else
     --count_room[room];
-  }
+}
 
 /*Removes an event*/
 void remove_event(int room, int eve_num){
