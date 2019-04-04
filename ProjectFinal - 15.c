@@ -159,13 +159,13 @@ int member_available(int data2,int hour,int dura,int room2,int escolha){
   return flag;
 }
 
-/*int available(int room,int eve_num,char des[],char date[],char hour[],int dura){
+int available(int room,int eve_num,char des[],char date[],char hour[],int dura){
   if (room_available(room,atoi(date),atoi(hour),dura,eve_num))
     printf("Impossivel agendar evento %s. Sala%d ocupada.\n",des,room);
-  else if (member_available(atoi(date),atoi(hour),dura,room)==0)
+  else if (!(member_available(atoi(date),atoi(hour),dura,room,0)))
     return 1;
   return 0;
-}*/
+}
 
 
 /*----Regular Functions----*/
