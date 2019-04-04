@@ -192,11 +192,37 @@ void print_room(int room){
 
 /*Print all events*/
 void print_all(){
-  int i=1,y=1,k;
-  matrix_to_vector();
+  event tempo;
+  int i,j,k=1,y = 1;
+  for ( i = 1; i <= 10; i++)
+    for ( j = 1; j <= count_room[i]; j++)
+      if (eve[i][j].duration!=0){
+        temp[k] = eve[i][j];
+        k++;}
+
+  for ( i = 1; i < k; i++)
+    for ( j = 1; j < k-i; j++)
+    if ((date_int(temp[j].date) > date_int(temp[j + 1].date)) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) > atoi(temp[j + 1].hour))) || ((date_int(temp[j].date) == date_int(temp[j + 1].date) &&
+    atoi(temp[j].hour) == atoi(temp[j + 1].hour) && temp[j].room > temp[j+1].room))){
+      tempo = temp[j];
+      temp[j] = temp[j + 1];
+      temp[j + 1] = tempo;}
+
+
+  for (i=1;i<=k;i++){
+    if (temp[i].duration!=0){
+    y=1;
+    printf("%s %s %s %d Sala%d %s\n*",temp[i].descripction,temp[i].date,
+    temp[i].hour,temp[i].duration,temp[i].room,temp[i].member[0]);
+    while (y<temp[i].count_members) printf(" %s",temp[i].member[y++]);
+    printf("\n");
+    }
+  }
+  /*matrix_to_vector();
   insertionSort(temp,k);
   for (i=1;i<=k;i++)
-    print_eve(temp[i].room,i);
+    print_eve(temp[i].room,i);*/
 }
 
 /*Creates an event*/
