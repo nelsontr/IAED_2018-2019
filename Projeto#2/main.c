@@ -5,17 +5,14 @@
  * Description: To be decide...
 */
 
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "functions.h"
 
-/*----MAIN PROGRAM----*/
 int main(){
   while (1){
-    input_work();
+    command=getchar();
     switch(command){
       case 'a': /*Add a Contact*/
+        scanf(" %s %s %s\n",nome,email,phone);
         add_contact();
         break;
       case 'l': /*Displays all contacts by order of creation*/
