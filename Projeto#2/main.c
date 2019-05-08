@@ -8,15 +8,17 @@
 #include "functions.h"
 
 int main(){
+  char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   while (1){
+    strcpy(name,""); strcpy(email,""); strcpy(phone,"");
     command=getchar();
     switch(command){
       case 'a': /*Add a Contact*/
-        scanf(" %s %s %s\n",nome,email,phone);
-        add_contact();
+        scanf(" %s %s %s\n",name,email,phone);
+        head = add_contact(head,name,email,phone);
         break;
       case 'l': /*Displays all contacts by order of creation*/
-        list_contact();
+        list_contact(head);
         break;
       case 'p': /*Searches Contact*/
         search_contact();
