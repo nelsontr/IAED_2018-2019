@@ -25,7 +25,11 @@ int main(){
       case 'l': /*Displays all contacts by order of creation*/
         list_contact(head);
         break;
-
+      case 'p':
+        scanf(" %s\n",name);
+        printf("%s\n",name);
+        search(head, name);
+        break;
       case 'x': /*Exits the Program*/
         free(head);
         exit(0);
