@@ -118,7 +118,24 @@ link delete(link head, contacts aux){
   return head;
 }
 
+void change_email(contacts aux,char email[]){
+  char*token = strtok(email, "@");
+  aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
+  strcpy(aux->email,token);
 
+  token = strtok(NULL, "\0");
+  aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
+  strcpy(aux->domain,token);
+}
+
+int how_many_domains(link t,char domain[]){
+  if (t==NULL)
+    return 0;
+  else if (strcmp(t->contact->domain,domain)==0)
+    return 1+how_many_domains(t->next,domain);
+  else
+    return how_many_domains(t->next,domain);
+}
 
 int main(){
   link head=NULL;
@@ -152,6 +169,18 @@ int main(){
           head=delete(head,contact_aux);
         else
           puts("Nome inexistente.");
+        break;
+      case 'e':
+        scanf(" %s %s",name,email);
+        contact_aux = search(head,name);
+        if (search(head,name)!=NULL)
+          change_email(contact_aux,email);
+        else
+          puts("Nome inexistente.");
+        break;
+      case 'c':
+        scanf(" %s",email);
+        printf("%s:%d\n",email,how_many_domains(head,email));
         break;
       case 'x': /*Exits the Program*/
         freeNODE(head);
