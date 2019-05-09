@@ -19,7 +19,7 @@ typedef struct cont{
 } *contacts;
 
 typedef struct node{
-  contacts contact;
+  contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
   struct node *next,*prev;
 } *link;
 
@@ -100,11 +100,15 @@ link search(link head, char name_a[]){
   return NULL;
 }
 
-link delete(link head, link t){
-  if(t==head)
+link delete(link t,link head){
+  if(t==head){
     head = t->next;
-  else
-    t->prev = t->next;
+    head->prev = NULL;
+    }
+  else{
+    t->prev->next = t->next;
+    t->next->prev = t->prev;
+  }
   clean(t);
   return head;
 }
