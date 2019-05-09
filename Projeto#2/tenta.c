@@ -19,7 +19,7 @@ typedef struct cont{
 } *contacts;
 
 typedef struct node{
-  contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
+  contacts contact;
   struct node *next,*prev;
 } *link;
 

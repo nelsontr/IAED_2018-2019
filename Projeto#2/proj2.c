@@ -34,23 +34,20 @@ char* input(char buffer[]){
 contacts create_contact(char name[], char email[], char phone[]){
   contacts contact_aux = malloc(sizeof(struct cont));
   char *token;
-  contact_aux->name = input(name);
 
+  contact_aux->name = input(name);
   token = strtok(email, "@");
   contact_aux->email = input(token);
-
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
-
   contact_aux->phone = input(phone);
-
   return contact_aux;
 }
 
 
 link add_contact(link head, char name[], char email[], char phone[]){
   link y, x = malloc(sizeof(struct node));
-    x->contact=create_contact(name,email,phone);
+    x->contact = create_contact(name,email,phone);
     x->next = NULL;
 
 /* ADD TO THE END */
