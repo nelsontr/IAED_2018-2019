@@ -20,7 +20,7 @@ typedef struct cont{
 
 typedef struct node{
   contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
-  struct node *next;
+  struct node *next,*prev;
 } *link;
 
 
@@ -34,30 +34,29 @@ char* input(char buffer[]){
 contacts create_contact(char name[], char email[], char phone[]){
   contacts contact_aux = malloc(sizeof(struct cont));
   char *token;
-  contact_aux->name = input(name);
 
+  contact_aux->name = input(name);
   token = strtok(email, "@");
   contact_aux->email = input(token);
-
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
-
   contact_aux->phone = input(phone);
-
   return contact_aux;
 }
 
 
 link add_contact(link head, char name[], char email[], char phone[]){
   link y, x = malloc(sizeof(struct node));
-    x->contact=create_contact(name,email,phone);
+    x->contact = create_contact(name,email,phone);
     x->next = NULL;
-
 /* ADD TO THE END */
-  if (head==NULL)
+  if (head==NULL){
+    x->prev = NULL;
     return x;
+  }
   for (y=head; y->next != NULL; y = y->next);
   y->next = x;
+  x->prev = y;
   return head;
 }
 
@@ -90,29 +89,23 @@ void list_contact(link head){
     print_contact(t->contact);
 }
 
-contacts search(link head, char name_a[]){
+link search(link head, char name_a[]){
   link current = head;
   while (current != NULL){
     if (strcmp(current->contact->name, name_a)==0){
-      return current->contact;
+      return current;
     }
     current = current->next;
   }
   return NULL;
 }
 
-link delete(link head, contacts aux){
-  link t,prev;
-  for(t=head, prev = NULL;t!=NULL;prev=t,t=t->next){
-    if(strcmp(t->contact->name, aux->name) == 0){
-      if(t==head)
-        head =t->next;
-      else
-        prev->next=t->next;
-      clean(t);
-      return head;
-    }
-  }
+link delete(link head, link t){
+  if(t==head)
+    head = t->next;
+  else
+    t->prev = t->next;
+  clean(t);
   return head;
 }
 
@@ -136,8 +129,7 @@ int how_many_domains(link t,char domain[]){
 }
 
 int main(){
-  link head=NULL;
-  contacts contact_aux=NULL;
+  link head=NULL,pos;
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   while (1){
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
@@ -154,25 +146,25 @@ int main(){
         break;
       case 'p':
         scanf(" %s",name);
-        contact_aux=search(head, name);
-        if (contact_aux!=NULL)
-          print_contact(contact_aux);
+        pos=search(head, name);
+        if (pos!=NULL)
+          print_contact(pos->contact);
         else
           puts("Nome inexistente.");
         break;
       case 'r':
         scanf(" %s",name);
-        contact_aux = search(head,name);
+        pos = search(head,name);
         if (search(head,name)!=NULL)
-          head=delete(head,contact_aux);
+          head=delete(head,pos);
         else
           puts("Nome inexistente.");
         break;
       case 'e':
         scanf(" %s %s",name,email);
-        contact_aux = search(head,name);
+        pos = search(head,name);
         if (search(head,name)!=NULL)
-          change_email(contact_aux,email);
+          change_email(pos->contact,email);
         else
           puts("Nome inexistente.");
         break;
