@@ -100,17 +100,18 @@ link search(link head, char name_a[]){
   return NULL;
 }
 
-link delete(link t,link head){
-  if(t==head){
-    head = t->next;
-    head->prev = NULL;
-    }
-  else{
-    t->prev->next = t->next;
-    t->next->prev = t->prev;
-  }
-  clean(t);
-  return head;
+
+link deleteNode(link head_ref, link del){
+    if (head_ref == NULL || del == NULL)
+        return head_ref;
+    if (head_ref == del)
+        head_ref = del->next;
+    if (del->next != NULL)
+        del->next->prev = del->prev;
+    if (del->prev != NULL)
+        del->prev->next = del->next;
+    clean(del);
+    return head_ref;
 }
 
 void change_email(contacts aux,char email[]){
@@ -134,8 +135,10 @@ int how_many_domains(link t,char domain[]){
 
 int main(){
   link head=NULL,pos;
+  /*link list[MAX_NAME];*/
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
-  while (1){
+  while (1){/*
+    for (i=0;i<=MAX_NAME;i++) list[i]=NULL;*/
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
     switch(getchar()){
       case 'a': /*Add a Contact*/
@@ -160,7 +163,7 @@ int main(){
         scanf(" %s",name);
         pos = search(head,name);
         if (search(head,name)!=NULL)
-          head=delete(head,pos);
+          head=deleteNode(head,pos);
         else
           puts("Nome inexistente.");
         break;
