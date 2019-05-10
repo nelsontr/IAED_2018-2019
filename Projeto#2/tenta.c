@@ -82,7 +82,6 @@ void list_contact(link head){
     print_contact(t->contact);
 }
 
-
 link search(link head, char name_a[]){
   link current = head;
   while (current != NULL){
@@ -96,6 +95,9 @@ link search(link head, char name_a[]){
 
 link alloc_node(link head, link x){
   link y;
+  if (head==NULL){
+    head=x;
+    return head;}
   for (y=head; y->next != NULL; y = y->next);
   y->next = x;
   x->prev = y;
@@ -136,9 +138,9 @@ int how_many_domains(link t,char domain[]){
     return how_many_domains(t->next,domain);
 }
 
-int hash(char name[],int M){
+int hash(char *v,int M){
   int h, a = 31415, b = 27183;
-  for (h = 0; *v != ’\0’; v++, a = a*b % (M-1))
+  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
     h = (a*h + *v) % M;
   return h;
 }
