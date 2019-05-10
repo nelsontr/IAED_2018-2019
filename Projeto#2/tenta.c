@@ -45,19 +45,12 @@ contacts create_contact(char name[], char email[], char phone[]){
 }
 
 
-link add_contact(link head, char name[], char email[], char phone[]){
-  link y, x = malloc(sizeof(struct node));
-    x->contact = create_contact(name,email,phone);
-    x->next = NULL;
-/* ADD TO THE END */
-  if (head==NULL){
-    x->prev = NULL;
-    return x;
-  }
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
-  return head;
+link create_node(link head, char name[], char email[], char phone[]){
+  link x = malloc(sizeof(struct node));
+  x->contact = create_contact(name,email,phone);
+  x->next = NULL;
+  x->prev = NULL;
+  return x;
 }
 
 void clean(link current){
@@ -89,6 +82,7 @@ void list_contact(link head){
     print_contact(t->contact);
 }
 
+
 link search(link head, char name_a[]){
   link current = head;
   while (current != NULL){
@@ -99,6 +93,15 @@ link search(link head, char name_a[]){
   }
   return NULL;
 }
+
+link alloc_node(link head, link x){
+  link y;
+  for (y=head; y->next != NULL; y = y->next);
+  y->next = x;
+  x->prev = y;
+  return head;
+}
+
 
 
 link deleteNode(link head_ref, link del){
@@ -133,18 +136,32 @@ int how_many_domains(link t,char domain[]){
     return how_many_domains(t->next,domain);
 }
 
+int hash(char name[],int M){
+  int h, a = 31415, b = 27183;
+  for (h = 0; *v != ’\0’; v++, a = a*b % (M-1))
+    h = (a*h + *v) % M;
+  return h;
+}
+
+
+
 int main(){
+  int i;
   link head=NULL,pos;
-  /*link list[MAX_NAME];*/
+  link list[1024];
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
-  while (1){/*
-    for (i=0;i<=MAX_NAME;i++) list[i]=NULL;*/
+  while (1){
+    for (i=0;i<=MAX_NAME;i++) list[i]=NULL;
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
     switch(getchar()){
       case 'a': /*Add a Contact*/
         scanf(" %s %s %s",name,email,phone);
-        if (search(head,name)==NULL)
-          head=add_contact(head,name,email,phone);
+        i=hash(name,1024);
+        if (search(list[i],name)==NULL){
+          pos=create_node(head,name,email,phone);
+          head=alloc_node(head,pos);
+          list[i]=pos;
+        }
         else
           puts("Nome existente.");
         break;
