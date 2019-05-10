@@ -19,7 +19,7 @@ typedef struct cont{
 } *contacts;
 
 typedef struct node{
-  contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
+  contacts contact;   
   struct node *next,*prev;
 } *link;
 
@@ -45,7 +45,7 @@ contacts create_contact(char name[], char email[], char phone[]){
 }
 
 
-link create_node(link head, char name[], char email[], char phone[]){
+link create_node(char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
   x->next = NULL;
@@ -138,32 +138,16 @@ int how_many_domains(link t,char domain[]){
     return how_many_domains(t->next,domain);
 }
 
-int hash(char *v,int M){
-  int h, a = 31415, b = 27183;
-  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-    h = (a*h + *v) % M;
-  return h;
-}
-
-
-
 int main(){
-  int i;
   link head=NULL,pos;
-  link list[1024];
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   while (1){
-    for (i=0;i<=MAX_NAME;i++) list[i]=NULL;
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
     switch(getchar()){
       case 'a': /*Add a Contact*/
         scanf(" %s %s %s",name,email,phone);
-        i=hash(name,1024);
-        if (search(list[i],name)==NULL){
-          pos=create_node(head,name,email,phone);
-          head=alloc_node(head,pos);
-          list[i]=pos;
-        }
+        if (search(head,name)==NULL)
+          head=alloc_node(head,create_node(name,email,phone));
         else
           puts("Nome existente.");
         break;
@@ -179,17 +163,17 @@ int main(){
           puts("Nome inexistente.");
         break;
       case 'r':
-        scanf(" %s",name);
-        pos = search(head,name);
-        if (search(head,name)!=NULL)
+        scanf(" %s\n",name);
+        pos=search(head, name);
+        if (pos!=NULL)
           head=deleteNode(head,pos);
         else
           puts("Nome inexistente.");
         break;
       case 'e':
         scanf(" %s %s",name,email);
-        pos = search(head,name);
-        if (search(head,name)!=NULL)
+        pos=search(head, name);
+        if (pos!=NULL)
           change_email(pos->contact,email);
         else
           puts("Nome inexistente.");
