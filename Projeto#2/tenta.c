@@ -12,6 +12,7 @@
 #define MAX_NAME 1024
 #define MAX_EMAIL 512
 #define MAX_PHONE 64
+#define TABLESIZE 1021
 
 /* STRUCTURS */
 typedef struct cont{
@@ -19,9 +20,14 @@ typedef struct cont{
 } *contacts;
 
 typedef struct node{
-  contacts contact;   
+  contacts contact;
   struct node *next,*prev;
 } *link;
+
+typedef struct node2{
+  link node;
+  struct node2 *next,*prev;
+} *hash;
 
 
 /* FUNCTIONS */
@@ -45,7 +51,7 @@ contacts create_contact(char name[], char email[], char phone[]){
 }
 
 
-link create_node(char name[], char email[], char phone[]){
+link create_node( char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
   x->next = NULL;
@@ -82,11 +88,11 @@ void list_contact(link head){
     print_contact(t->contact);
 }
 
-link search(link head, char name_a[]){
-  link current = head;
+link search(link2 head, char name_a[]){
+  link2 current = head;
   while (current != NULL){
-    if (strcmp(current->contact->name, name_a)==0){
-      return current;
+    if (strcmp(current->node->contact->name, name_a)==0){
+      return current->node;
     }
     current = current->next;
   }
@@ -138,16 +144,56 @@ int how_many_domains(link t,char domain[]){
     return how_many_domains(t->next,domain);
 }
 
+int hashcode(char *v,int M){
+  int h, a = 31415, b = 27183;
+  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
+    h = (a*h + *v) % M;
+  return h;
+}
+
+link2 create_hash(link2 head,link pos){
+  link2 y;
+  if (head==NULL){
+    head=malloc(sizeof(struct node2));
+    head->node=pos;
+    head->next=NULL;
+    head->prev=NULL;
+    return head;}
+  for (y=head; y->next != NULL; y = y->next);
+  y->next = pos;
+  pos->prev = y;
+  return head;
+}
+
+void freehash(link2 head){
+  link2 next, current = head;
+  while (current != NULL){
+      if(current->next!=NULL){
+       next = current->next;
+       freeNODE(current->node);
+       current = next;
+   }}
+   head = NULL;
+}
+
+
 int main(){
-  link head=NULL,pos;
+  link head=NULL,pos=NULL,node_aux=NULL;
+  hash hastable[TABLESIZE];
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   while (1){
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
+    for (i=0;i<TABLESIZE;i++)
+      list[i]=NULL;
     switch(getchar()){
       case 'a': /*Add a Contact*/
         scanf(" %s %s %s",name,email,phone);
-        if (search(head,name)==NULL)
-          head=alloc_node(head,create_node(name,email,phone));
+        i=hashcode(name,TABLESIZE);
+        if (search(head,name)==NULL){
+          node_aux=create_node(name,email,phone);
+          head=alloc_node(head,node_aux);
+          list[i]=create_hash(list[i],pos);
+        }
         else
           puts("Nome existente.");
         break;
@@ -156,7 +202,8 @@ int main(){
         break;
       case 'p':
         scanf(" %s",name);
-        pos=search(head, name);
+        i=hashcode(name,TABLESIZE);
+        pos=search(list[i], name);
         if (pos!=NULL)
           print_contact(pos->contact);
         else
@@ -164,7 +211,8 @@ int main(){
         break;
       case 'r':
         scanf(" %s\n",name);
-        pos=search(head, name);
+        i=hashcode(name,TABLESIZE);
+        pos=search(list[i], name);
         if (pos!=NULL)
           head=deleteNode(head,pos);
         else
@@ -172,7 +220,8 @@ int main(){
         break;
       case 'e':
         scanf(" %s %s",name,email);
-        pos=search(head, name);
+        i=hashcode(name,TABLESIZE);
+        pos=search(list[i], name);
         if (pos!=NULL)
           change_email(pos->contact,email);
         else
