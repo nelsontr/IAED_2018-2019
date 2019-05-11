@@ -12,6 +12,7 @@
 #define MAX_NAME 1024
 #define MAX_EMAIL 512
 #define MAX_PHONE 64
+#define TABLESIZE 10210
 
 /* STRUCTURS */
 typedef struct cont{
@@ -19,16 +20,22 @@ typedef struct cont{
 } *contacts;
 
 typedef struct node{
-  contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
+  contacts contact;
   struct node *next,*prev;
 } *link;
 
 typedef struct node2{
-  link node;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
+  link node;
   struct node2 *next,*prev;
-} *link2;
+} *hash;
 
+typedef struct email{
+  char *name;
+  link node;
+  struct email *next,*prev;
+} *Count_email;
 
+link last=NULL;
 /* FUNCTIONS */
 char* input(char buffer[]){
   char *x = malloc(sizeof(char) * (strlen(buffer)+1));
@@ -87,10 +94,10 @@ void list_contact(link head){
     print_contact(t->contact);
 }
 
-link search(link head, char name_a[]){
-  link current = head;
+hash search(hash head, char name_a[]){
+  hash current = head;
   while (current != NULL){
-    if (strcmp(current->contact->name, name_a)==0){
+    if (strcmp(current->node->contact->name, name_a)==0){
       return current;
     }
     current = current->next;
@@ -99,13 +106,13 @@ link search(link head, char name_a[]){
 }
 
 link alloc_node(link head, link x){
-  link y;
   if (head==NULL){
     head=x;
     return head;}
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
+
+  last->next = x;
+  x->prev = last;
+  last=x;
   return head;
 }
 
@@ -121,6 +128,19 @@ link deleteNode(link head_ref, link del){
     if (del->prev != NULL)
         del->prev->next = del->next;
     clean(del);
+    return head_ref;
+}
+
+hash deleteHASH(hash head_ref, hash del){
+    if (head_ref == NULL || del == NULL)
+        return head_ref;
+    if (head_ref == del)
+        head_ref = del->next;
+    if (del->next != NULL)
+        del->next->prev = del->prev;
+    if (del->prev != NULL)
+        del->prev->next = del->next;
+    free(del);
     return head_ref;
 }
 
@@ -143,41 +163,111 @@ int how_many_domains(link t,char domain[]){
     return how_many_domains(t->next,domain);
 }
 
-int hash(char *v,int M){
+int hashcode(char *v,int M){
   int h, a = 31415, b = 27183;
   for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
     h = (a*h + *v) % M;
   return h;
 }
 
-int main(){
-  int i;
-  link head=NULL,pos;
-  link2 list[10];
-  char name[10],email[10],phone[10];
-  for (i=0;i<10;i++) list[i]=NULL;
-  strcpy(name,"Ok"); strcpy(email,"tre@dfg"); strcpy(phone,"986");
-    i=hash(name,10);
-    if(list[i]==NULL)
-      list[i]=malloc(sizeof(struct node2));
-      list[i]->Node->contact->name=NULL;
-    if (search(list[i],name)==NULL){
-      pos=create_node(name,email,phone);
-      head=alloc_node(head,pos);
-      list[i]->Node=pos;}
 
-  strcpy(name,"Ok1"); strcpy(email,"lk@dfg"); strcpy(phone,"986");
-    i=hash(name,10);
-    if(list[i]==NULL)
-      list[i]=malloc(sizeof(struct node2));
-    if (search(list[i],name)==NULL){
-      pos=create_node(name,email,phone);
-      head=alloc_node(head,pos);
-      list[1]->next=pos;
-      list[i]->Node=pos;
-      }
-  pos=search(list[i],"Ok1");
-  print_contact(pos->contact);
-  list_contact(head);
+hash create_hash(link node){
+  hash x = malloc(sizeof(struct node2));
+  x->node = node;
+  x->next = NULL;
+  x->prev = NULL;
+  return x;
+}
+
+hash alloc_hash(hash head, link node){
+  hash y,x=create_hash(node);
+  if (head==NULL){
+    head=x;
+    return head;}
+  for (y=head; y->next != NULL; y = y->next);
+  y->next = x;
+  x->prev = y;
+  return head;
+}
+
+void freeHASH(hash head){
+  hash next, current = head;
+  while (current != NULL){
+       next = current->next;
+       free(current);
+       current = next;
+   }
+   head = NULL;
+}
+
+
+
+int main(){
+  int i=0;
+  link head=NULL,node_aux=NULL;
+  hash hashtable[TABLESIZE],pos=NULL;
+  char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
+  for (i=0;i<TABLESIZE;i++)
+    hashtable[i]=NULL;
+
+  while (1){
+    strcpy(name,""); strcpy(email,""); strcpy(phone,"");
+    switch(getchar()){
+      case 'a': /*Add a Contact*/
+        scanf(" %s %s %s",name,email,phone);
+        i=hashcode(name,TABLESIZE);
+        if (search(hashtable[i],name)==NULL){
+          node_aux=create_node(name,email,phone);
+          head=alloc_node(head,node_aux);
+          hashtable[i]=alloc_hash(hashtable[i],node_aux);
+        }
+        else
+          puts("Nome existente.");
+        break;
+      case 'l': /*Displays all contacts by order of creation*/
+        list_contact(head);
+        break;
+      case 'p':
+        scanf(" %s",name);
+        i=hashcode(name,TABLESIZE);
+        pos=search(hashtable[i], name);
+        if (pos!=NULL)
+          print_contact(pos->node->contact);
+        else
+          puts("Nome inexistente.");
+        break;
+      case 'r':
+        scanf(" %s",name);
+        i=hashcode(name,TABLESIZE);
+        pos=search(hashtable[i], name);
+        if (pos!=NULL){
+          head=deleteNode(head,pos->node);
+          hashtable[i]=deleteHASH(hashtable[i],pos);
+        }
+
+        else
+          puts("Nome inexistente.");
+        break;
+      case 'e':
+        scanf(" %s %s",name,email);
+        i=hashcode(name,TABLESIZE);
+        pos=search(hashtable[i], name);
+        if (pos!=NULL)
+          change_email(pos->node->contact,email);
+        else
+          puts("Nome inexistente.");
+        break;
+      case 'c':
+        scanf(" %s",email);
+        printf("%s:%d\n",email,how_many_domains(head,email));
+        break;
+      case 'x': /*Exits the Program*/
+        freeNODE(head);
+        for (i=0;i<TABLESIZE;i++)
+          freeHASH(hashtable[i]);
+        exit(0);
+        break;
+    }
+  }
   return 0;
 }
