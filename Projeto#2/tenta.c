@@ -29,7 +29,7 @@ typedef struct node2{
   struct node2 *next,*prev;
 } *hash;
 
-
+link last=NULL;
 /* FUNCTIONS */
 char* input(char buffer[]){
   char *x = malloc(sizeof(char) * (strlen(buffer)+1));
@@ -100,13 +100,14 @@ link search(link2 head, char name_a[]){
 }
 
 link alloc_node(link head, link x){
-  link y;
+
   if (head==NULL){
     head=x;
     return head;}
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
+
+  last->next = x;
+  x->prev = last;
+  last=x;
   return head;
 }
 
