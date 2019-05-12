@@ -37,7 +37,7 @@ typedef struct email{
 
 
 link head=NULL, last = NULL;
-/*Count_email domain[100];*/
+Count_email domain[100];
 
 
 /* FUNCTIONS */
@@ -53,44 +53,40 @@ int hashcode(char *v,int M){
   h = (a*h + *v) % M;
   return h;
 }
-/*
-int search_domain(Count_email head, char name_a[]){
-Count_email current = head;
-while (current != NULL){
-if (strcmp(current->domain, name_a)==0){
-return current->count;
-}
-current = current->next;
-}
-return 0;
+
+Count_email search_domain(char name_a[]){
+  int i=hashcode(name_a,10);
+  Count_email current = domain[i];
+  while (current != NULL){
+    if (strcmp(current->domain, name_a)==0)
+      return current;
+    current = current->next;
+  }
+  return NULL;
 }
 
 Count_email create_domain(char domai[]){
-Count_email aux=malloc(sizeof(struct email));
-aux->domain=input(domai);
-aux->count=1;
-aux->next=NULL;
-aux->prev=NULL;
-return aux;
+  Count_email aux=malloc(sizeof(struct email));
+  aux->domain=input(domai);
+  aux->count=1;
+  aux->next=NULL;
+  aux->prev=NULL;
+  return aux;
 }
 
 void alloc_domain(char domai[]){
-int i=hashcode(domai,100);
-Count_email aux=create_domain(domai),y;
-if (domain[i]==NULL)
-domain[i]=aux;
-else{
-for (y=domain[i]; strcmp(domain[i]->domain,domai)!=0; y = y->next);
-if (y->next!=NULL)
-y->count+=1;
-else{
-domain[i]->prev = aux;
-aux->next=domain[i];
-aux->prev=NULL;
-domain[i]=aux;
+  int i=hashcode(domai,100);
+  Count_email aux=search_domain(domai);
+  if (aux==NULL)
+    domain[i]=create_domain(domai);
+  else{
+    aux->count+=1;
+    domain[i]->prev = aux;
+    aux->next=domain[i];
+    aux->prev=NULL;
+    domain[i]=aux;
+  }
 }
-}
-}*/
 
 contacts create_contact(char name[], char email[], char phone[]){
   char *token;
