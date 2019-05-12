@@ -12,7 +12,7 @@
 #define MAX_NAME 1024
 #define MAX_EMAIL 512
 #define MAX_PHONE 64
-#define TABLESIZE 2000
+#define TABLESIZE 1031
 
 /* STRUCTURS */
 typedef struct cont{
@@ -37,7 +37,8 @@ typedef struct email{
 
 
 link head=NULL, last = NULL;
-Count_email domain[100];
+/*Count_email domain[100];*/
+
 
 /* FUNCTIONS */
 char* input(char buffer[]){
@@ -46,56 +47,54 @@ char* input(char buffer[]){
   return x;
 }
 
-
 int hashcode(char *v,int M){
   int h, a = 31415, b = 27183;
   for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-    h = (a*h + *v) % M;
+  h = (a*h + *v) % M;
   return h;
 }
 /*
 int search_domain(Count_email head, char name_a[]){
-  Count_email current = head;
-  while (current != NULL){
-    if (strcmp(current->domain, name_a)==0){
-      return current->count;
-    }
-    current = current->next;
-  }
-  return 0;
+Count_email current = head;
+while (current != NULL){
+if (strcmp(current->domain, name_a)==0){
+return current->count;
+}
+current = current->next;
+}
+return 0;
 }
 
 Count_email create_domain(char domai[]){
-  Count_email aux=malloc(sizeof(struct email));
-  aux->domain=input(domai);
-  aux->count=1;
-  aux->next=NULL;
-  aux->prev=NULL;
-  return aux;
+Count_email aux=malloc(sizeof(struct email));
+aux->domain=input(domai);
+aux->count=1;
+aux->next=NULL;
+aux->prev=NULL;
+return aux;
 }
 
 void alloc_domain(char domai[]){
-  int i=hashcode(domai,100);
-  Count_email aux=create_domain(domai),y;
-  if (domain[i]==NULL)
-    domain[i]=aux;
-  else{
-    for (y=domain[i]; strcmp(domain[i]->domain,domai)!=0; y = y->next);
-    if (y->next!=NULL)
-      y->count+=1;
-    else{
-    domain[i]->prev = aux;
-    aux->next=domain[i];
-    aux->prev=NULL;
-    domain[i]=aux;
-    }
-  }
+int i=hashcode(domai,100);
+Count_email aux=create_domain(domai),y;
+if (domain[i]==NULL)
+domain[i]=aux;
+else{
+for (y=domain[i]; strcmp(domain[i]->domain,domai)!=0; y = y->next);
+if (y->next!=NULL)
+y->count+=1;
+else{
+domain[i]->prev = aux;
+aux->next=domain[i];
+aux->prev=NULL;
+domain[i]=aux;
+}
+}
 }*/
 
 contacts create_contact(char name[], char email[], char phone[]){
-  contacts contact_aux = malloc(sizeof(struct cont));
   char *token;
-
+  contacts contact_aux = malloc(sizeof(struct cont));
   contact_aux->name = input(name);
   token = strtok(email, "@");
   contact_aux->email = input(token);
@@ -106,7 +105,6 @@ contacts create_contact(char name[], char email[], char phone[]){
   return contact_aux;
 }
 
-
 link create_node( char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
@@ -115,94 +113,13 @@ link create_node( char name[], char email[], char phone[]){
   return x;
 }
 
-void clean(link current){
-  free(current->contact->name);
-  free(current->contact->email);
-  free(current->contact->domain);
-  free(current->contact->phone);
-  free(current->contact);
-  free(current);
-}
-
-void freeNODE(){
-  link next, current = head;
-  while (current != NULL){
-       next = current->next;
-       clean(current);
-       current = next;
-   }
-   head = NULL;
-}
-
-void print_contact(contacts t){
-  printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
-}
-
-void list_contact(link head){
-  link t;
-  for (t=head;t!=NULL; t=t->next)
-    print_contact(t->contact);
-}
-
-hash search(hash head, char name_a[]){
-  hash current = head;
-  while (current != NULL){
-    if (strcmp(current->node->contact->name, name_a)==0){
-      return current;
-    }
-    current = current->next;
-  }
-  return NULL;
-}
-
 void alloc_node(link x){
-  if (head==NULL){
-    head=x;
-    last=head;
+  if (head==NULL){  /*If it's the first element*/
+    head=x, last=head;
   }
-  else{
-    last->next = x;
-    x->prev = last;
-    last=x;
-  }
-}
-
-
-void deleteNode(link del){
-    if (head != NULL || del != NULL){
-      if (head == del)
-          head = del->next;
-      if (del->next != NULL)
-          del->next->prev = del->prev;
-      else
-        last=del->prev;
-      if (del->prev != NULL)
-          del->prev->next = del->next;
-      clean(del);
-  }
-}
-
-hash deleteHASH(hash head_ref, hash del){
-    if (head_ref == NULL || del == NULL)
-        return head_ref;
-    if (head_ref == del)
-        head_ref = del->next;
-    if (del->next != NULL)
-      del->next->prev = del->prev;
-    if (del->prev != NULL)
-        del->prev->next = del->next;
-    free(del);
-    return head_ref;
-}
-
-void change_email(contacts aux,char email[]){
-  char*token = strtok(email, "@");
-  aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
-  strcpy(aux->email,token);
-
-  token = strtok(NULL, "\0");
-  aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
-  strcpy(aux->domain,token);
+  last->next = x;
+  x->prev = last;
+  last=x;
 }
 
 hash create_hash(link node){
@@ -225,14 +142,64 @@ hash alloc_hash(hash head, link node){
   return head;
 }
 
-void freeHASH(hash head){
-  hash next, current = head;
+void print_contact(contacts t){
+  printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
+}
+
+void list_contact(){
+  link t;
+  for (t=head;t!=NULL; t=t->next)
+    print_contact(t->contact);
+}
+
+hash search(hash head, char name_a[]){
+  hash current = head;
   while (current != NULL){
-       next = current->next;
-       free(current);
-       current = next;
-   }
-   head = NULL;
+    if (strcmp(current->node->contact->name, name_a)==0){
+      return current;
+    }
+    current = current->next;
+  }
+  return NULL;
+}
+
+
+
+
+void deleteNode(link del){
+  if (head != NULL || del != NULL){
+    if (head == del)
+      head = del->next;
+    if (del->next != NULL)
+      del->next->prev = del->prev;
+    else
+      last=del->prev;
+    if (del->prev != NULL)
+      del->prev->next = del->next;
+    clean(del);
+  }
+}
+
+hash deleteHASH(hash head_ref, hash del){
+  if (head_ref == NULL || del == NULL)
+    return head_ref;
+  if (head_ref == del)
+    head_ref = del->next;
+  if (del->next != NULL)
+    del->next->prev = del->prev;
+  if (del->prev != NULL)
+    del->prev->next = del->next;
+  free(del);
+  return head_ref;
+}
+
+void change_email(contacts aux,char email[]){
+  char*token = strtok(email, "@");
+  aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
+  strcpy(aux->email,token);
+  token = strtok(NULL, "\0");
+  aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
+  strcpy(aux->domain,token);
 }
 
 int how_many_domains(link t,char domain[]){
@@ -245,6 +212,36 @@ int how_many_domains(link t,char domain[]){
 }
 
 
+/* FREE - FUNCTIONS */
+void clean(link current){
+  free(current->contact->name);
+  free(current->contact->email);
+  free(current->contact->domain);
+  free(current->contact->phone);
+  free(current->contact);
+  free(current);
+}
+
+void freeNODE(){
+  link next, current = head;
+  while (current != NULL){
+    next = current->next;
+    clean(current);
+    current = next;
+  }
+  head = NULL;
+}
+
+void freeHASH(hash head){
+  hash next, current = head;
+  while (current != NULL){
+    next = current->next;
+    free(current);
+    current = next;
+  }
+  head = NULL;
+}
+
 
 
 int main(){
@@ -253,7 +250,7 @@ int main(){
   hash hashtable[TABLESIZE],pos=NULL;
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   for (i=0;i<TABLESIZE;i++)
-    hashtable[i]=NULL;
+  hashtable[i]=NULL;
 
   while (1){
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
@@ -270,7 +267,7 @@ int main(){
           puts("Nome existente.");
         break;
       case 'l': /*Displays all contacts by order of creation*/
-        list_contact(head);
+        list_contact();
         break;
       case 'p':
         scanf(" %s",name);
@@ -289,7 +286,6 @@ int main(){
           deleteNode(pos->node);
           hashtable[i]=deleteHASH(hashtable[i],pos);
         }
-
         else
           puts("Nome inexistente.");
         break;
@@ -310,7 +306,7 @@ int main(){
       case 'x': /*Exits the Program*/
         freeNODE();
         for (i=0;i<TABLESIZE;i++)
-          freeHASH(hashtable[i]);
+        freeHASH(hashtable[i]);
         exit(0);
         break;
     }
