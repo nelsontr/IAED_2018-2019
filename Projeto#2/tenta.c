@@ -29,13 +29,21 @@ typedef struct node2{
   struct node2 *next,*prev;
 } *hash;
 
-link last=NULL;
+typedef struct email{
+  char *domain;
+  int count;
+  struct email *next,*prev;
+} *Count_email;
+
+
+
 /* FUNCTIONS */
 char* input(char buffer[]){
   char *x = malloc(sizeof(char) * (strlen(buffer)+1));
   strcpy(x,buffer);
   return x;
 }
+
 
 contacts create_contact(char name[], char email[], char phone[]){
   contacts contact_aux = malloc(sizeof(struct cont));
@@ -100,14 +108,13 @@ hash search(hash head, char name_a[]){
 }
 
 link alloc_node(link head, link x){
-
+  link y;
   if (head==NULL){
     head=x;
     return head;}
-
-  last->next = x;
-  x->prev = last;
-  last=x;
+  for (y=head; y->next != NULL; y = y->next);
+  y->next = x;
+  x->prev = y;
   return head;
 }
 
