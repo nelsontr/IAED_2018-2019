@@ -36,6 +36,8 @@ typedef struct email{
 } *Count_email;
 
 
+link last = NULL;
+
 
 /* FUNCTIONS */
 char* input(char buffer[]){
@@ -111,10 +113,11 @@ link alloc_node(link head, link x){
   link y;
   if (head==NULL){
     head=x;
+    last=head;
     return head;}
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
+  last->next = x;
+  x->prev = last;
+  last=x;
   return head;
 }
 
@@ -186,9 +189,10 @@ hash alloc_hash(hash head, link node){
   if (head==NULL){
     head=x;
     return head;}
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
+  head->prev = x;
+  x->next=head;
+  x->prev=NULL;
+  head=x;
   return head;
 }
 
