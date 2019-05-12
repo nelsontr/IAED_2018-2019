@@ -110,7 +110,6 @@ hash search(hash head, char name_a[]){
 }
 
 link alloc_node(link head, link x){
-  link y;
   if (head==NULL){
     head=x;
     last=head;
@@ -130,6 +129,8 @@ link deleteNode(link head_ref, link del){
         head_ref = del->next;
     if (del->next != NULL)
         del->next->prev = del->prev;
+    else
+      last=del->prev;
     if (del->prev != NULL)
         del->prev->next = del->next;
     clean(del);
@@ -142,7 +143,7 @@ hash deleteHASH(hash head_ref, hash del){
     if (head_ref == del)
         head_ref = del->next;
     if (del->next != NULL)
-        del->next->prev = del->prev;
+      del->next->prev = del->prev;
     if (del->prev != NULL)
         del->prev->next = del->next;
     free(del);
@@ -185,7 +186,7 @@ hash create_hash(link node){
 }
 
 hash alloc_hash(hash head, link node){
-  hash y,x=create_hash(node);
+  hash x=create_hash(node);
   if (head==NULL){
     head=x;
     return head;}
