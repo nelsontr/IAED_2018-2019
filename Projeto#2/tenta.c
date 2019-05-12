@@ -36,7 +36,7 @@ typedef struct email{
 } *Count_email;
 
 
-link last = NULL;
+link head=NULL, last = NULL;
 
 
 /* FUNCTIONS */
@@ -78,7 +78,7 @@ void clean(link current){
   free(current);
 }
 
-void freeNODE(link head){
+void freeNODE(){
   link next, current = head;
   while (current != NULL){
        next = current->next;
@@ -109,32 +109,31 @@ hash search(hash head, char name_a[]){
   return NULL;
 }
 
-link alloc_node(link head, link x){
+void alloc_node(link x){
   if (head==NULL){
     head=x;
     last=head;
-    return head;}
-  last->next = x;
-  x->prev = last;
-  last=x;
-  return head;
+  }
+  else{
+    last->next = x;
+    x->prev = last;
+    last=x;
+  }
 }
 
 
-
-link deleteNode(link head_ref, link del){
-    if (head_ref == NULL || del == NULL)
-        return head_ref;
-    if (head_ref == del)
-        head_ref = del->next;
-    if (del->next != NULL)
-        del->next->prev = del->prev;
-    else
-      last=del->prev;
-    if (del->prev != NULL)
-        del->prev->next = del->next;
-    clean(del);
-    return head_ref;
+void deleteNode(link del){
+    if (head != NULL || del != NULL){
+      if (head == del)
+          head = del->next;
+      if (del->next != NULL)
+          del->next->prev = del->prev;
+      else
+        last=del->prev;
+      if (del->prev != NULL)
+          del->prev->next = del->next;
+      clean(del);
+  }
 }
 
 hash deleteHASH(hash head_ref, hash del){
@@ -211,7 +210,7 @@ void freeHASH(hash head){
 
 int main(){
   int i=0;
-  link head=NULL,node_aux=NULL;
+  link node_aux=NULL;
   hash hashtable[TABLESIZE],pos=NULL;
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   for (i=0;i<TABLESIZE;i++)
@@ -225,7 +224,7 @@ int main(){
         i=hashcode(name,TABLESIZE);
         if (search(hashtable[i],name)==NULL){
           node_aux=create_node(name,email,phone);
-          head=alloc_node(head,node_aux);
+          alloc_node(node_aux);
           hashtable[i]=alloc_hash(hashtable[i],node_aux);
         }
         else
@@ -248,7 +247,7 @@ int main(){
         i=hashcode(name,TABLESIZE);
         pos=search(hashtable[i], name);
         if (pos!=NULL){
-          head=deleteNode(head,pos->node);
+          deleteNode(pos->node);
           hashtable[i]=deleteHASH(hashtable[i],pos);
         }
 
@@ -269,7 +268,7 @@ int main(){
         printf("%s:%d\n",email,how_many_domains(head,email));
         break;
       case 'x': /*Exits the Program*/
-        freeNODE(head);
+        freeNODE();
         for (i=0;i<TABLESIZE;i++)
           freeHASH(hashtable[i]);
         exit(0);
