@@ -37,7 +37,7 @@ typedef struct email{
 
 
 link head=NULL, last = NULL;
-
+Count_email domain[100];
 
 /* FUNCTIONS */
 char* input(char buffer[]){
@@ -46,6 +46,51 @@ char* input(char buffer[]){
   return x;
 }
 
+
+int hashcode(char *v,int M){
+  int h, a = 31415, b = 27183;
+  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
+    h = (a*h + *v) % M;
+  return h;
+}
+/*
+int search_domain(Count_email head, char name_a[]){
+  Count_email current = head;
+  while (current != NULL){
+    if (strcmp(current->domain, name_a)==0){
+      return current->count;
+    }
+    current = current->next;
+  }
+  return 0;
+}
+
+Count_email create_domain(char domai[]){
+  Count_email aux=malloc(sizeof(struct email));
+  aux->domain=input(domai);
+  aux->count=1;
+  aux->next=NULL;
+  aux->prev=NULL;
+  return aux;
+}
+
+void alloc_domain(char domai[]){
+  int i=hashcode(domai,100);
+  Count_email aux=create_domain(domai),y;
+  if (domain[i]==NULL)
+    domain[i]=aux;
+  else{
+    for (y=domain[i]; strcmp(domain[i]->domain,domai)!=0; y = y->next);
+    if (y->next!=NULL)
+      y->count+=1;
+    else{
+    domain[i]->prev = aux;
+    aux->next=domain[i];
+    aux->prev=NULL;
+    domain[i]=aux;
+    }
+  }
+}*/
 
 contacts create_contact(char name[], char email[], char phone[]){
   contacts contact_aux = malloc(sizeof(struct cont));
@@ -56,6 +101,7 @@ contacts create_contact(char name[], char email[], char phone[]){
   contact_aux->email = input(token);
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
+  /*alloc_domain(contact_aux->domain);*/
   contact_aux->phone = input(phone);
   return contact_aux;
 }
@@ -159,23 +205,6 @@ void change_email(contacts aux,char email[]){
   strcpy(aux->domain,token);
 }
 
-int how_many_domains(link t,char domain[]){
-  if (t==NULL)
-    return 0;
-  else if (strcmp(t->contact->domain,domain)==0)
-    return 1+how_many_domains(t->next,domain);
-  else
-    return how_many_domains(t->next,domain);
-}
-
-int hashcode(char *v,int M){
-  int h, a = 31415, b = 27183;
-  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-    h = (a*h + *v) % M;
-  return h;
-}
-
-
 hash create_hash(link node){
   hash x = malloc(sizeof(struct node2));
   x->node = node;
@@ -205,6 +234,16 @@ void freeHASH(hash head){
    }
    head = NULL;
 }
+
+int how_many_domains(link t,char domain[]){
+  if (t==NULL)
+    return 0;
+  else if (strcmp(t->contact->domain,domain)==0)
+    return 1+how_many_domains(t->next,domain);
+  else
+    return how_many_domains(t->next,domain);
+}
+
 
 
 
@@ -265,6 +304,7 @@ int main(){
         break;
       case 'c':
         scanf(" %s",email);
+        i=hashcode(email,100);
         printf("%s:%d\n",email,how_many_domains(head,email));
         break;
       case 'x': /*Exits the Program*/
