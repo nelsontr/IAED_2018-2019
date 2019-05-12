@@ -65,6 +65,17 @@ Count_email search_domain(char name_a[]){
   return NULL;
 }
 
+Count_email search_domain(char name_a[]){
+  int i=hashcode(name_a,10);
+  Count_email current = domain[i];
+  while (current != NULL){
+    if (strcmp(current->domain, name_a)==0)
+      return current;
+    current = current->next;
+  }
+  return NULL;
+}
+
 Count_email create_domain(char domai[]){
   Count_email aux=malloc(sizeof(struct email));
   aux->domain=input(domai);
@@ -75,16 +86,23 @@ Count_email create_domain(char domai[]){
 }
 
 void alloc_domain(char domai[]){
-  int i=hashcode(domai,100);
-  Count_email aux=search_domain(domai);
-  if (aux==NULL)
+  int i=hashcode(domai,10);
+  Count_email aux=NULL;
+
+
+  if (domain[i]==NULL)
     domain[i]=create_domain(domai);
-  else{
-    aux->count+=1;
-    domain[i]->prev = aux;
-    aux->next=domain[i];
-    aux->prev=NULL;
-    domain[i]=aux;
+  else {
+    aux=search_domain(domai);
+    if (aux==NULL){
+      aux=create_domain(domai);
+      domain[i]->prev = aux;
+      aux->next=domain[i];
+      aux->prev=NULL;
+      domain[i]=aux;
+    }
+    else
+      aux->count+=1;
   }
 }
 
