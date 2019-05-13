@@ -12,7 +12,7 @@
 #define MAX_NAME 1024
 #define MAX_EMAIL 512
 #define MAX_PHONE 64
-#define TABLESIZE 2000
+#define TABLESIZE 1031
 
 /* STRUCTURS */
 typedef struct cont{
@@ -38,6 +38,7 @@ typedef struct email{
 /* GLOBAL VARIABLES */
 link head=NULL, last = NULL;
 hash hashtable[TABLESIZE];
+Count_email domain[TABLESIZE];
 
 /* FUNCTIONS */
 char* input(char buffer[]){
@@ -49,18 +50,66 @@ char* input(char buffer[]){
 int hashcode(char *v,int M){
   int h, a = 31415, b = 27183;
   for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-    h = (a*h + *v) % M;
+  h = (a*h + *v) % M;
   return h;
 }
+
+Count_email search_domain(int i,char name_a[]){
+  Count_email current = domain[i];
+  while (current != NULL){
+    if (strcmp(current->domain, name_a)==0)
+      return current;
+    current = current->next;
+  }
+  return NULL;
+}
+
+Count_email create_domain(char domai[]){
+  Count_email aux=malloc(sizeof(struct email));
+  aux->domain=input(domai);
+  aux->count=1;
+  aux->next=NULL;
+  aux->prev=NULL;
+  return aux;
+}
+
+void alloc_domain(int i,char domai[]){
+  Count_email aux=NULL;
+
+  if (domain[i]==NULL)
+    domain[i]=create_domain(domai);
+  else {
+    aux=search_domain(i,domai);
+    if (aux==NULL){
+      aux=create_domain(domai);
+      domain[i]->prev = aux;
+      aux->next=domain[i];
+      aux->prev=NULL;
+      domain[i]=aux;
+    }
+    else
+      aux->count+=1;
+  }
+}
+
+void decrease_c(char domain[]){
+  int i=hashcode(domain,TABLESIZE);
+  Count_email aux=search_domain(i,domain);
+  aux->count-=1;
+}
+
 
 contacts create_contact(char name[], char email[], char phone[]){
   contacts contact_aux = malloc(sizeof(struct cont));
   char *token;
+  int i=0;
   contact_aux->name = input(name);
   token = strtok(email, "@");
   contact_aux->email = input(token);
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
+  i=hashcode(contact_aux->domain,TABLESIZE);
+  alloc_domain(i,contact_aux->domain);
   contact_aux->phone = input(phone);
   return contact_aux;
 }
@@ -125,20 +174,15 @@ hash search(int i, char name_a[]){
 
 void change_email(contacts aux,char email[]){
   char*token = strtok(email, "@");
+  int i=0;
   aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
   strcpy(aux->email,token);
+
   token = strtok(NULL, "\0");
   aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
   strcpy(aux->domain,token);
-}
-
-int how_many_domains(link t,char domain[]){
-  if (t==NULL)
-    return 0;
-  else if (strcmp(t->contact->domain,domain)==0)
-    return 1+how_many_domains(t->next,domain);
-  else
-    return how_many_domains(t->next,domain);
+  i=hashcode(aux->domain,TABLESIZE);
+  alloc_domain(i,aux->domain);
 }
 
 void clean(link current){
@@ -186,6 +230,17 @@ void deleteHASH(int i, hash del){
   }
 }
 
+void freeDOM(int i){
+  Count_email next, current = domain[i];
+  while (current != NULL){
+    next = current->next;
+    free(current->domain);
+    free(current);
+    current = next;
+  }
+  hashtable[i] = NULL;
+}
+
 void freeHASH(int i){
   hash next, current = hashtable[i];
   while (current != NULL){
@@ -201,8 +256,11 @@ int main(){
   link node_aux=NULL;
   hash pos=NULL;
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
-  for (i=0;i<TABLESIZE;i++)
+  Count_email aux=NULL;
+  for (i=0;i<TABLESIZE;i++){
     hashtable[i]=NULL;
+    domain[i]=NULL;
+  }
 
   while (1){
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
@@ -235,10 +293,10 @@ int main(){
         i=hashcode(name,TABLESIZE);
         pos=search(i, name);
         if (pos!=NULL){
+          decrease_c(pos->node->contact->domain);
           deleteNode(pos->node);
           deleteHASH(i,pos);
         }
-
         else
           puts("Nome inexistente.");
         break;
@@ -246,19 +304,30 @@ int main(){
         scanf(" %s %s",name,email);
         i=hashcode(name,TABLESIZE);
         pos=search(i, name);
-        if (pos!=NULL)
+        if (pos!=NULL){
+          decrease_c(pos->node->contact->domain);
           change_email(pos->node->contact,email);
+        }
         else
           puts("Nome inexistente.");
         break;
       case 'c':
         scanf(" %s",email);
-        printf("%s:%d\n",email,how_many_domains(head,email));
+        i=hashcode(email,TABLESIZE);
+        aux=search_domain(i,email);
+        if (aux!=NULL)
+          printf("%s:%d\n",aux->domain,aux->count);
+        else
+          printf("%s:%d\n",email,0);
         break;
       case 'x': /*Exits the Program*/
-        freeNODE();
-        for (i=0;i<TABLESIZE;i++)
+      freeNODE();
+        for (i=0;i<TABLESIZE;i++){
           freeHASH(i);
+        }
+        for (i=0;i<TABLESIZE;i++){
+          freeDOM(i);
+        }
         exit(0);
         break;
     }
