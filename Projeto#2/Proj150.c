@@ -24,21 +24,22 @@ typedef struct node{
   struct node *next,*prev;
 } *link;
 
-typedef struct node2{
+typedef struct Hash{
   link node;
-  struct node2 *next,*prev;
+  struct Hash *next,*prev;
 } *hash;
 
 typedef struct email{
   char *domain;
   int count;
   struct email *next,*prev;
-} *Count_email;
+} *Counter_domain;
 
 /* GLOBAL VARIABLES */
 link head=NULL, last = NULL;
 hash hashtable[TABLESIZE];
-Count_email domain[TABLESIZE];
+Counter_domain domain[TABLESIZE];
+
 
 /* FUNCTIONS */
 char* input(char buffer[]){
@@ -54,8 +55,8 @@ int hashcode(char *v,int M){
   return h;
 }
 
-Count_email search_domain(int i,char name_a[]){
-  Count_email current = domain[i];
+Counter_domain search_domain(int i,char name_a[]){
+  Counter_domain current = domain[i];
   while (current != NULL){
     if (strcmp(current->domain, name_a)==0)
       return current;
@@ -64,9 +65,9 @@ Count_email search_domain(int i,char name_a[]){
   return NULL;
 }
 
-Count_email create_domain(char domai[]){
-  Count_email aux=malloc(sizeof(struct email));
-  aux->domain=input(domai);
+Counter_domain create_domain(char domain[]){
+  Counter_domain aux=malloc(sizeof(struct email));
+  aux->domain=input(domain);
   aux->count=1;
   aux->next=NULL;
   aux->prev=NULL;
@@ -74,7 +75,7 @@ Count_email create_domain(char domai[]){
 }
 
 void alloc_domain(int i,char domai[]){
-  Count_email aux=NULL;
+  Counter_domain aux=NULL;
 
   if (domain[i]==NULL)
     domain[i]=create_domain(domai);
@@ -94,8 +95,8 @@ void alloc_domain(int i,char domai[]){
 
 void decrease_c(char domain[]){
   int i=hashcode(domain,TABLESIZE);
-  Count_email aux=search_domain(i,domain);
-  aux->count-=1;
+  Counter_domain aux=search_domain(i,domain);
+  aux->count--;
 }
 
 
@@ -114,7 +115,7 @@ contacts create_contact(char name[], char email[], char phone[]){
   return contact_aux;
 }
 
-link create_node( char name[], char email[], char phone[]){
+link create_node(char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
   x->next = NULL;
@@ -133,7 +134,7 @@ void alloc_node(link x){
 }
 
 hash create_hash(link node){
-  hash x = malloc(sizeof(struct node2));
+  hash x = malloc(sizeof(struct Hash));
   x->node = node;
   x->next = NULL;
   x->prev = NULL;
@@ -231,7 +232,7 @@ void deleteHASH(int i, hash del){
 }
 
 void freeDOM(int i){
-  Count_email next, current = domain[i];
+  Counter_domain next, current = domain[i];
   while (current != NULL){
     next = current->next;
     free(current->domain);
@@ -251,17 +252,20 @@ void freeHASH(int i){
   hashtable[i] = NULL;
 }
 
-int main(){
+void inicialize(){
   int i=0;
-  link node_aux=NULL;
-  hash pos=NULL;
-  char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
-  Count_email aux=NULL;
   for (i=0;i<TABLESIZE;i++){
     hashtable[i]=NULL;
     domain[i]=NULL;
   }
+}
 
+int main(){
+  int i=0;
+  link node_aux=NULL;
+  hash pos=NULL;
+  Counter_domain aux=NULL;
+  char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
   while (1){
     strcpy(name,""); strcpy(email,""); strcpy(phone,"");
     switch(getchar()){
@@ -321,11 +325,9 @@ int main(){
           printf("%s:%d\n",email,0);
         break;
       case 'x': /*Exits the Program*/
-      freeNODE();
+        freeNODE();
         for (i=0;i<TABLESIZE;i++){
           freeHASH(i);
-        }
-        for (i=0;i<TABLESIZE;i++){
           freeDOM(i);
         }
         exit(0);
