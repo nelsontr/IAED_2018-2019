@@ -322,7 +322,6 @@ int main(){
         for (i=0;i<TABLESIZE;i++)
         freeHASH(hashtable[i]);
         exit(0);
-        break;
     }
   }
   return 0;
