@@ -1,52 +1,88 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include "functions.h"
 
-/* STRUCTURS */
-typedef struct Contact{
-  char *name, *email, *domain, *phone;
-} *contacts;
-
-typedef struct node{
-  contacts contact;
-  struct node *next,*prev;
-} *link;
-
-typedef struct Hash{
-  link node;
-  struct node2 *next,*prev;
-} *hash;
-
-typedef struct email{
-  char *name;
-  int counter;
-  struct email *next,*prev;
-} *Count_email;
-
-
-/*Global Variables*/
-link last=NULL;
-
-
-/*--------Functions--------*/
-
+/*_______________/----- FUNCTIONS -----\_______________*/
 char* input(char buffer[]){
   char *x = malloc(sizeof(char) * (strlen(buffer)+1));
   strcpy(x,buffer);
   return x;
 }
 
+int hashcode(char *v){
+  int h, a = 31415, b = 27183, M = TABLESIZE;
+  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
+    h = (a*h + *v) % M;
+  return h;
+}
+
+
+/*_______________/----- CONTACT FUNCTIONS -----\_______________*/
 contacts create_contact(char name[], char email[], char phone[]){
-  contacts contact_aux = malloc(sizeof(struct cont));
+  int i=0;
   char *token;
+  contacts contact_aux = malloc(sizeof(struct cont));
   contact_aux->name = input(name);
   token = strtok(email, "@");
   contact_aux->email = input(token);
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
+  i=hashcode(contact_aux->domain);
+  alloc_domain(i,contact_aux->domain);
   contact_aux->phone = input(phone);
   return contact_aux;
 }
 
-link create_node( char name[], char email[], char phone[]){
+
+/*_______________/----- DOMAIN FUNCTIONS -----\_______________*/
+Counter_domain search_domain(int i,char name_a[]){
+  Counter_domain current = domain[i];
+  while (current != NULL){
+    if (strcmp(current->domain, name_a)==0)
+      return current;
+    current = current->next;
+  }
+  return NULL;
+}
+
+Counter_domain create_domain(char domain[]){
+  Counter_domain aux=malloc(sizeof(struct email));
+  aux->domain = input(domain);
+  aux->count = 1;
+  aux->next = NULL;
+  aux->prev = NULL;
+  return aux;
+}
+
+void alloc_domain(int i,char domai[]){
+  Counter_domain aux=NULL;
+
+  if (domain[i]==NULL)
+    domain[i]=create_domain(domai);
+  else {
+    aux=search_domain(i,domai);
+    if (aux==NULL){
+      aux=create_domain(domai);
+      domain[i]->prev = aux;
+      aux->next=domain[i];
+      aux->prev=NULL;
+      domain[i]=aux;
+    }
+    else
+      aux->count+=1;
+  }
+}
+
+void decrease_c(char domain[]){
+  int i=hashcode(domain);
+  Counter_domain aux=search_domain(i,domain);
+  aux->count--;
+}
+
+
+/*_________/----- HASH AND LINKED LIST FUNCTIONS -----\_________*/
+link create_node(char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
   x->next = NULL;
@@ -54,44 +90,18 @@ link create_node( char name[], char email[], char phone[]){
   return x;
 }
 
-int hashcode(char *v,int M){
-  int h, a = 31415, b = 27183;
-  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-    h = (a*h + *v) % M;
-  return h;
+void alloc_node(link x){
+  if (head==NULL)
+    head=x, last=head;
+  else{
+    last->next = x;
+    x->prev = last;
+    last=x;
+  }
 }
 
-hash create_hash(link node){
-  hash x = malloc(sizeof(struct node2));
-  x->node = node;
-  x->next = NULL;
-  x->prev = NULL;
-  return x;
-}
-
-hash alloc_hash(hash head, link node){
-  hash y,x=create_hash(node);
-  if (head==NULL){
-    head=x;
-    return head;}
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  x->prev = y;
-  return head;
-}
-
-void print_contact(contacts t){
-  printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
-}
-
-void list_contact(link head){
-  link t;
-  for (t=head;t!=NULL; t=t->next)
-    print_contact(t->contact);
-}
-
-hash search(hash head, char name_a[]){
-  hash current = head;
+hash search_hash(int i, char name_a[]){
+  hash current = hashtable[i];
   while (current != NULL){
     if (strcmp(current->node->contact->name, name_a)==0)
       return current;
@@ -100,61 +110,53 @@ hash search(hash head, char name_a[]){
   return NULL;
 }
 
-link alloc_node(link head, link x){
-  if (head==NULL){
-    head=x;
-    return head;
+hash create_hash(link node){
+  hash x = malloc(sizeof(struct Hash));
+  x->node = node;
+  x->next = NULL;
+  x->prev = NULL;
+  return x;
+}
+
+void alloc_hash(int i, link node){
+  hash x=create_hash(node);
+  if (hashtable[i]==NULL)
+    hashtable[i]=x;
+  else{
+    hashtable[i]->prev = x;
+    x->next=hashtable[i];
+    x->prev=NULL;
+    hashtable[i]=x;
   }
-  last->next = x;
-  x->prev = last;
-  last=x;
-  return head;
+}
+
+
+/*_______________/----- OTHER FUNCTIONS -----\_______________*/
+void print_contact(contacts t){
+  printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
+}
+
+void list_contact(){
+  link t;
+  for (t=head;t!=NULL; t=t->next)
+    print_contact(t->contact);
 }
 
 void change_email(contacts aux,char email[]){
   char*token = strtok(email, "@");
+  int i=0;
   aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
   strcpy(aux->email,token);
+
   token = strtok(NULL, "\0");
   aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
   strcpy(aux->domain,token);
+  i=hashcode(aux->domain);
+  alloc_domain(i,aux->domain);
 }
 
-int how_many_domains(link t,char domain[]){
-  if (t==NULL)
-    return 0;
-  else if (strcmp(t->contact->domain,domain)==0)
-    return 1+how_many_domains(t->next,domain);
-  else
-    return how_many_domains(t->next,domain);
-}
 
-link deleteNode(link head_ref, link del){
-    if (head_ref == NULL || del == NULL)
-        return head_ref;
-    if (head_ref == del)
-        head_ref = del->next;
-    if (del->next != NULL)
-        del->next->prev = del->prev;
-    if (del->prev != NULL)
-        del->prev->next = del->next;
-    clean(del);
-    return head_ref;
-}
-
-hash deleteHASH(hash head_ref, hash del){
-    if (head_ref == NULL || del == NULL)
-        return head_ref;
-    if (head_ref == del)
-        head_ref = del->next;
-    if (del->next != NULL)
-        del->next->prev = del->prev;
-    if (del->prev != NULL)
-        del->prev->next = del->next;
-    free(del);
-    return head_ref;
-}
-
+/*_______________/----- FREE FUNCTIONS -----\_______________*/
 void clean(link current){
   free(current->contact->name);
   free(current->contact->email);
@@ -164,23 +166,61 @@ void clean(link current){
   free(current);
 }
 
-void freeNODE(link head){
+void freeNODE(){
   link next, current = head;
   while (current != NULL){
-       next = current->next;
-       clean(current);
-       current = next;
-   }
-   head = NULL;
+    next = current->next;
+    clean(current);
+    current = next;
+  }
+  head = NULL;
 }
 
-void freeHASH(hash head){
-  hash next, current = head;
+void freeDOM(int i){
+  Counter_domain next, current = domain[i];
   while (current != NULL){
-       next = current->next;
-       freeNODE(current->node);
-       free(current);
-       current = next;
-   }
-   head = NULL;
+    next = current->next;
+    free(current->domain);
+    free(current);
+    current = next;
+  }
+  hashtable[i] = NULL;
+}
+
+void freeHASH(int i){
+  hash next, current = hashtable[i];
+  while (current != NULL){
+    next = current->next;
+    free(current);
+    current = next;
+  }
+  hashtable[i] = NULL;
+}
+
+
+/*_______________/----- Remove FUNCTIONS -----\_______________*/
+void deleteNode(link del){
+  if (head != NULL || del != NULL){
+    if (head == del)
+      head = del->next;
+    if (del->next != NULL)
+      del->next->prev = del->prev;
+    else
+      last=del->prev;
+    if (del->prev != NULL)
+      del->prev->next = del->next;
+    clean(del);
+  }
+}
+
+void deleteHASH(int i, hash del){
+  if (hashtable[i] != NULL || del != NULL){
+    if (hashtable[i] == del)
+      hashtable[i] = del->next;
+    if (del->next != NULL)
+      del->next->prev = del->prev;
+    if (del->prev != NULL)
+      del->prev->next = del->next;
+    free(del);
+  }
 }
