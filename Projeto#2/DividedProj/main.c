@@ -13,7 +13,7 @@
 
 int main(){
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];
-  Initializes();
+  Initializes();  /*See functions in functions.c*/
   while (1){
     switch(getchar()){
       case 'a':  /*ADDS CONTACT*/

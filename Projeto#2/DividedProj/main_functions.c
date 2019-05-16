@@ -1,9 +1,18 @@
+/*
+ * File:  main_functions.c
+ * Author:  Nelson Trindade
+ * IST Number: 93743
+ * Description: Principal functions used in switch in main.c.
+ */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "main_functions.h"
 #include "functions.h"
-/*Function that adds a contact, by creating a node in */
+
+/*_______________/----- MAIN FUNCTIONS -----\_______________*/
+
+/* Function that adds a contact, by creating a node in linked list */
 void command_a(char name[], char email[], char phone[]){
   link node_aux=NULL;
   int i=hashcode(name);
@@ -16,7 +25,7 @@ void command_a(char name[], char email[], char phone[]){
     puts("Nome existente.");
 }
 
-/*Searches and prints the contact by giving the name*/
+/* Searches and prints the contact that is associated with the name given */
 void command_p(char name[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
@@ -27,7 +36,7 @@ void command_p(char name[]){
     puts("Nome inexistente.");
 }
 
-/*Removes a contact by givving a name*/
+/* Removes the contact associated with the name given */
 void command_r(char name[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
@@ -41,7 +50,8 @@ void command_r(char name[]){
     puts("Nome inexistente.");
 }
 
-/*Changes the email of a contact, by givving a name and the new email*/
+/* Changes the email of a contact,
+by giving the name of the contact and the new email  */
 void command_e(char name[],char email[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
@@ -54,7 +64,7 @@ void command_e(char name[],char email[]){
     puts("Nome inexistente.");
 }
 
-/*Shows how many domains exists in the list*/
+/* Shows how many specific domains exists in the all contacts */
 void command_c(char email[]){
   int i=hashcode(email);
   Counter_domain aux=search_domain(i,email);
@@ -64,11 +74,11 @@ void command_c(char email[]){
     printf("%s:%d\n",email,0);
 }
 
-/*Exits the program and give free's to every malloc giveen*/
+/* Exits the program and give free's to every malloc made */
 void command_x(){
   int i=0;
   freeNODE();
-  for (i=0;i<TABLESIZE;i++){
+  for (;i<TABLESIZE;i++){
     freeHASH(i);
     freeDOM(i);
   }

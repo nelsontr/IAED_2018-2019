@@ -1,9 +1,8 @@
 /*
- * File:  main.c
+ * File:  functions.c
  * Author:  Nelson Trindade
  * IST Number: 93743
- * Description: Code for a Contact list. It uses linked lists, Hashtables for
-    searching contacts and other for domains.
+ * Description: Functions used in main.c and main_functions.c
  */
 #include <stdio.h>
 #include <string.h>
@@ -12,49 +11,47 @@
 #include "main_functions.h"
 
 /*___________/----- GLOBAL VARIABLES -----\___________*/
-link head=NULL, last = NULL; /*Principal List, a.k.a. Linked list*/
+link head=NULL, last = NULL; /*Principal List, a.k.a. Linked list to contacts*/
 hash hashtable[TABLESIZE];  /*For searching reasons*/
 Counter_domain domain[TABLESIZE];  /*For giving the number of domains*/
 
 
 /*_______________/----- FUNCTIONS -----\_______________*/
-/*Initializes all HashTables with NULL*/
+/* Initializes both hashtables with NULL value */
 void Initializes(){
   int i=0;
-  for (i=0;i<TABLESIZE;i++)
+  for (;i<TABLESIZE;i++)
     hashtable[i]=NULL, domain[i]=NULL;
 }
 
-/*Allocs only the memory necessary.*/
+/* Allocs only the memory necessary for a string. */
 char* input(char buffer[]){
   char *x = malloc(sizeof(char) * (strlen(buffer)+1));
   strcpy(x,buffer);
   return x;
 }
 
-/*Returns a code by inserting a string.
-It is used to make the HashTable more efficient*/
-int hashcode(char *v){
-  int h, a = 31415, b = 27183, M=TABLESIZE;
-  for (h = 0; *v != '\0'; v++, a = a*b % (M-1))
-  h = (a*h + *v) % M;
-  return h;
+/* Returns a code by inserting a string.
+It is used to make both hashtables more efficient */
+int hashcode(char *str){
+  int x=0, a=31415, b=27183, M=TABLESIZE;
+  for (x = 0; *str != '\0'; str++, a = a*b % (M-1))
+    x = (a*x + *str) % M;
+  return x;
 }
 
 
 /*_______________/----- DOMAIN FUNCTIONS -----\_______________*/
-/*It searches in the HashTable designed to search domains*/
+/* It searches in the hashtable domains for the specific hashtable element*/
 Counter_domain search_domain(int i,char name_a[]){
   Counter_domain current = domain[i];
-  while (current != NULL){
-    if (strcmp(current->domain, name_a)==0)
+  for(;current!=NULL;current=current->next)
+    if (!strcmp(current->domain, name_a))
       return current;
-    current = current->next;
-  }
   return NULL;
 }
 
-/*It creates and returns a domain*/
+/* It creates and returns a domain */
 Counter_domain create_domain(char domain[]){
   Counter_domain aux=malloc(sizeof(struct email));
   aux->domain=input(domain);
@@ -64,49 +61,50 @@ Counter_domain create_domain(char domain[]){
   return aux;
 }
 
-/*Allocs a domain, witch means that it chooses were to create or were
-to add 1 to the counter a domain*/
+/* Allocs a domain, witch means that it chooses were to create or were
+to add 1 to the counter of a domain */
 void alloc_domain(int i,char domai[]){
   Counter_domain aux=NULL;
-  if (domain[i]==NULL)
+  if (domain[i]==NULL)  /* If it's the first element on the hashtable */
     domain[i]=create_domain(domai);
   else {
     aux=search_domain(i,domai);
-    if (aux==NULL){
+    if (aux==NULL){ /* If it's not the first element, and there is not one
+                    hashtable element for that domain */
       aux=create_domain(domai);
       domain[i]->prev = aux;
       aux->next=domain[i];
       aux->prev=NULL;
       domain[i]=aux;
     }
-    else
+    else  /* If exists, and its not the first one, add 1 to counter */
       aux->count++;
   }
 }
 
-/*It finds the domain by giving a name and decreases one value to the count*/
-void decrease_domain(char domain[]){
-  int i=hashcode(domain);
-  Counter_domain aux=search_domain(i,domain);
+/* It finds the domain by giving a name and decreases one value of the count */
+void decrease_domain(char domain_a[]){
+  int i=hashcode(domain_a);
+  Counter_domain aux=search_domain(i,domain_a);
   aux->count--;
 }
 
 
 /*_______________/----- CONTACT FUNCTIONS -----\_______________*/
-/*Function that creates and returns a contact. Besides that, increases the counter
-of domain existing*/
+/* Function that creates and returns a contact.
+While doing it, calls function to alloc the domain. */
 contacts create_contact(char name[], char email[], char phone[]){
   int i=0;
   char *token;
   contacts contact_aux = malloc(sizeof(struct cont));
 
   contact_aux->name = input(name);
-  token = strtok(email, "@");   /*Strtok to separate email and domain*/
+  token = strtok(email, "@");   /* Strtok to separate email and domain */
   contact_aux->email = input(token);
   token = strtok(NULL, "\0");
   contact_aux->domain = input(token);
   i=hashcode(contact_aux->domain);
-  /*Step needed to know the local were the domain needs to update*/
+  /* Step needed to know the local were the domain needs to update */
   alloc_domain(i,contact_aux->domain);
   contact_aux->phone = input(phone);
   return contact_aux;
@@ -114,7 +112,8 @@ contacts create_contact(char name[], char email[], char phone[]){
 
 
 /*_________/----- HASH AND LINKED LIST FUNCTIONS -----\_________*/
-/*Creates and returns a node. Also creates a contact that is asocciated with the node*/
+/* Creates and returns a node.
+Also creates a contact that is asocciated with the node */
 link create_node(char name[], char email[], char phone[]){
   link x = malloc(sizeof(struct node));
   x->contact = create_contact(name,email,phone);
@@ -123,28 +122,27 @@ link create_node(char name[], char email[], char phone[]){
   return x;
 }
 
-/*Function that puts the last node created in the last position of the principal list*/
+/* Function that puts the last node created in the last position
+of the principal list */
 void alloc_node(link x){
-  if (head==NULL)
-    head=x, last=head;
-  else{
+  if (head!=NULL){
     last->next = x;
     x->prev = last;
     last=x;
+    return;
   }
+  head=x, last=head;
 }
 
-/*Function that searches what hash is the one that I'm looking for*/
+/* Function that searches what element is the one that I'm looking for in hash */
 hash search_hash(int i, char name_a[]){
   hash current = hashtable[i];
-  while (current != NULL){
-    if (strcmp(current->node->contact->name, name_a)==0)
+  for(;current!=NULL;current=current->next)
+    if (!strcmp(current->node->contact->name, name_a))
       return current;
-    current = current->next;
-  }
   return NULL;
 }
-/*Creates and returns a new hash with node associated to it*/
+/* Creates and returns a new hashtable element with node associated to it */
 hash create_hash(link node){
   hash x = malloc(sizeof(struct Hash));
   x->node = node;
@@ -153,7 +151,7 @@ hash create_hash(link node){
   return x;
 }
 
-/*Allocs memory to guard a new hash, associating with node*/
+/* Allocs memory to guard a new hashtable element, associating with node */
 void alloc_hash(int i, link node){
   hash x=create_hash(node);
   if (hashtable[i]==NULL)
@@ -167,22 +165,20 @@ void alloc_hash(int i, link node){
 }
 
 
-
-
 /*_______________/----- OTHER FUNCTIONS -----\_______________*/
-/*Prints a contact given*/
+/* Prints a contact that was given */
 void print_contact(contacts t){
   printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
 }
 
-/*Prints all contacts in the principal list*/
+/* Prints all contacts in the principal list (Linked list) */
 void list_contact(){
-  link t;
-  for (t=head;t!=NULL; t=t->next)
+  link t=head;
+  for (;t!=NULL; t=t->next)
     print_contact(t->contact);
 }
 
-/*It changes a email of a contact given to a new email*/
+/* It changes a email of a contact to the new email given */
 void change_email(contacts aux,char email[]){
   int i=0;
   char*token = strtok(email, "@");
@@ -192,14 +188,15 @@ void change_email(contacts aux,char email[]){
   token = strtok(NULL, "\0");
   aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
   strcpy(aux->domain,token);
+
   i=hashcode(aux->domain);
   alloc_domain(i,aux->domain);
 }
 
 
 /*_______________/----- FREE FUNCTIONS -----\_______________*/
-/*Function that free all the variables of contact and the contact it selfS*/
-void clean(link current){
+/* Function that free all the variables of contact and the node of the contact. */
+void clean_node(link current){
   free(current->contact->name);
   free(current->contact->email);
   free(current->contact->domain);
@@ -208,18 +205,18 @@ void clean(link current){
   free(current);
 }
 
-/*Function that free all nodes in the linked list. It calls the clean funct.*/
+/* Function that free all nodes in the linked list. It calls the clean function */
 void freeNODE(){
   link next, current = head;
   while (current != NULL){
     next = current->next;
-    clean(current);
+    clean_node(current);
     current = next;
   }
   head = NULL;
 }
 
-/*Function that free all Doman HashTable*/
+/* Function that free a specific Domain */
 void freeDOM(int i){
   Counter_domain next, current = domain[i];
   while (current != NULL){
@@ -228,10 +225,10 @@ void freeDOM(int i){
     free(current);
     current = next;
   }
-  hashtable[i] = NULL;
+  domain[i] = NULL;
 }
 
-/*Function that free all Search HashTable*/
+/* Function that free a specific hashtable element */
 void freeHASH(int i){
   hash next, current = hashtable[i];
   while (current != NULL){
@@ -244,7 +241,7 @@ void freeHASH(int i){
 
 
 /*_______________/----- Remove FUNCTIONS -----\_______________*/
-/*Deletes a Node and all mallocs made in contatcs*/
+/* Deletes a Node and all mallocs made in contatcs */
 void deleteNode(link del){
   if (head != NULL || del != NULL){
     if (head == del)
@@ -255,11 +252,11 @@ void deleteNode(link del){
       last=del->prev;
     if (del->prev != NULL)
       del->prev->next = del->next;
-    clean(del);
+    clean_node(del);
   }
 }
 
-/*Deletes a Hash*/
+/* Deletes a Hash */
 void deleteHASH(int i, hash del){
   if (hashtable[i] != NULL || del != NULL){
     if (hashtable[i] == del)

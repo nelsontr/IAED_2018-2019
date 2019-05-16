@@ -1,13 +1,13 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
 
-
+/*_______________/----- CONSTANTS -----\_______________*/
 #define MAX_NAME 1024
 #define MAX_EMAIL 512  /*Bowth for email and domain*/
 #define MAX_PHONE 64
 #define TABLESIZE 1031  /*For Hashtable to search_hash and Domain List*/
 
-
+/*_______________/----- STRUCTURES -----\_______________*/
 typedef struct cont{
   char *name, *email, *domain, *phone;
 } *contacts;
@@ -29,7 +29,7 @@ typedef struct email{
 } *Counter_domain;
 
 
-
+/*_______________/----- PROTOTYPES -----\_______________*/
 void Initializes();
 char* input(char buffer[]);
 int hashcode(char *v);
@@ -46,7 +46,7 @@ void alloc_hash(int i, link node);
 void print_contact(contacts t);
 void list_contact();
 void change_email(contacts aux,char email[]);
-void clean(link current);
+void clean_node(link current);
 void freeNODE();
 void freeDOM(int i);
 void freeHASH(int i);
