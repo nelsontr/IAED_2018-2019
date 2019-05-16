@@ -5,7 +5,7 @@
 #define MAX_NAME 1024
 #define MAX_EMAIL 512  /*Both for email and domain*/
 #define MAX_PHONE 64
-#define TABLESIZE 1031  /*For Hashtable to search_hash and Domain List*/
+#define TABLESIZE 1031  /*For Hashtable to search_hash and Domain list*/
 
 /*_______________/----- STRUCTURES -----\_______________*/
 typedef struct cont{
