@@ -1,62 +1,56 @@
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
+#ifndef FUNCTIONS_H
+#define FUNCTIONS_H
 
-/*CONSTANTS*/
+/*_______________/----- CONSTANTS -----\_______________*/
 #define MAX_NAME 1024
-#define MAX_EMAIL 512
+#define MAX_EMAIL 512  /*Bowth for email and domain*/
 #define MAX_PHONE 64
+#define TABLESIZE 1031  /*For Hashtable to search_hash and Domain Hash*/
 
-/*Structurs*/
-typedef struct{
-  char *name, *email, *phone;
+/*_______________/----- STRUCTURES -----\_______________*/
+typedef struct cont{
+  char *name, *email, *domain, *phone;
 } *contacts;
 
 typedef struct node{
-  contacts contact;   /*VERIFICAR SE E' NECESSARIO COLOCAR POINTER*/
-  struct node *next;
+  contacts contact;
+  struct node *next,*prev;
 } *link;
 
-char* input(char buffer[]){
-  char *x = (char*) malloc(sizeof(char) * (strlen(buffer)+1));
-  strcpy(x,buffer);
-  return x;
-}
+typedef struct Hash{
+  link node;
+  struct Hash *next,*prev;
+} *hash;
 
-link add_contact(link head, char name[], char email[], char phone[]){
-  contacts contact_aux = malloc(sizeof(contacts));
-  link y, x = malloc(sizeof(link));
-  contact_aux->name = input(name);
-  contact_aux->email = input(email);
-  contact_aux->phone = input(phone);
+typedef struct email{
+  char *domain;
+  int count;
+  struct email *next,*prev;
+} *Counter_domain;
 
 
-  x->contact = contact_aux;
-  x->next = NULL;
+/*_______________/----- PROTOTYPES -----\_______________*/
+void Initializes();
+char* input(char buffer[]);
+int hashcode(char *str);
+Counter_domain search_domain(int i,char name_aux[]);
+Counter_domain create_domain(char domain[]);
+void alloc_domain(int i,char domain_aux[]);
+void decrease_domain(char domain_aux[]);
+contacts create_contact(char name[], char email[], char phone[]);
+link create_node(char name[], char email[], char phone[]);
+void alloc_node(link node_aux);
+hash search_hash(int i, char name_aux[]);
+hash create_hash(link node);
+void alloc_hash(int i, link node);
+void print_contact(contacts t);
+void list_contact();
+void change_email(contacts aux,char email[]);
+void clean_node(link node);
+void freeNODE();
+void freeDOM(int i);
+void freeHASH(int i);
+void deleteNode(link node_del);
+void deleteHASH(int i, hash hash_del);
 
-/* ADD TO THE END */
-  if (head==NULL)
-    return x;
-  for (y=head; y->next != NULL; y = y->next);
-  y->next = x;
-  return head;
-}
-
-void list_contact(link head){
-  link t;
-  for (t=head;t!=NULL; t=t->next)
-    printf("%s %s %s\n", t->contact->name, t->contact->email, t->contact->phone);
-}
-
-int search(link head, char name_a[]){
-  link current = head;
-  while (current != NULL){
-    if (strcmp(current->contact->name, name_a)==0){
-      printf("%s %s %s\n", current->contact->name,current->contact->email,current->contact->phone);
-      return 1;
-    }
-    current = current->next;
-  }
-  puts("Nome inixestente.");
-  return 0;
-}
+#endif
