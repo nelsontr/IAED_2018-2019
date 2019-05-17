@@ -12,6 +12,7 @@
 #include "functions.h"
 #include "main_functions.h"
 
+/*_______________/----- MAIN PROGRAM -----\_______________*/
 
 int main(){
   char name[MAX_NAME],email[MAX_EMAIL],phone[MAX_PHONE];

@@ -12,7 +12,7 @@
 
 /*_______________/----- MAIN FUNCTIONS -----\_______________*/
 
-/* Function that adds a contact, by creating a node in the linked list
+/* Function that adds a contact, by creating a node in the principal list
 and on the hashtable */
 void command_a(char name[], char email[], char phone[]){
   link node_aux = NULL;
@@ -34,9 +34,9 @@ void command_l(){
 /* Searches and prints the contact that is associated with the name given */
 void command_p(char name[]){
   int i=hashcode(name);
-  hash pos=search_hash(i, name);
-  if (pos!=NULL)
-    print_contact(pos->node->contact);
+  hash element=search_hash(i, name);
+  if (element!=NULL)
+    print_contact(element->node->contact);
   else
     puts("Nome inexistente.");
 }
@@ -44,11 +44,11 @@ void command_p(char name[]){
 /* Removes the contact associated with the name given */
 void command_r(char name[]){
   int i=hashcode(name);
-  hash pos=search_hash(i, name);
-  if (pos!=NULL){
-    decrease_domain(pos->node->contact->domain);
-    deleteNode(pos->node);
-    deleteHASH(i,pos);
+  hash element=search_hash(i, name);
+  if (element!=NULL){
+    decrease_domain(element->node->contact->domain);
+    deleteNode(element->node);
+    deleteHASH(i,element);
   }
   else
     puts("Nome inexistente.");
@@ -58,10 +58,10 @@ void command_r(char name[]){
 by giving the name of the contact and the new email  */
 void command_e(char name[],char email[]){
   int i=hashcode(name);
-  hash pos=search_hash(i, name);
-  if (pos!=NULL){
-    decrease_domain(pos->node->contact->domain);
-    change_email(pos->node->contact,email);
+  hash element=search_hash(i, name);
+  if (element!=NULL){
+    decrease_domain(element->node->contact->domain);
+    change_email(element->node->contact,email);
   }
   else
     puts("Nome inexistente.");
@@ -70,9 +70,9 @@ void command_e(char name[],char email[]){
 /* Shows how many specific domains exists in the all contacts */
 void command_c(char email[]){
   int i=hashcode(email);
-  Counter_domain aux=search_domain(i,email);
-  if (aux!=NULL)
-    printf("%s:%d\n",aux->domain,aux->count);
+  Counter_domain count_aux=search_domain(i,email);
+  if (count_aux!=NULL)
+    printf("%s:%d\n",count_aux->domain,count_aux->count);
   else
     printf("%s:%d\n",email,0);
 }

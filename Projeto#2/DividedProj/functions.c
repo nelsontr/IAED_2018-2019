@@ -1,4 +1,4 @@
-/*
+count_aux/*
  * File:  functions.c
  * Author:  Nelson Trindade
  * IST Number: 93743
@@ -11,9 +11,13 @@
 #include "main_functions.h"
 
 /*___________/----- GLOBAL VARIABLES -----\___________*/
-link head = NULL, last = NULL; /*Principal List, a.k.a. Linked list to contacts*/
-hash hashtable[TABLESIZE];  /*For searching reasons*/
-Counter_domain domain[TABLESIZE];  /*For couting domains*/
+/*Principal List, a.k.a. Linked list to contacts.
+head being the first element and last the last element of the list*/
+link head = NULL, last = NULL;
+/*For searching reasons*/
+hash hashtable[TABLESIZE];
+/*For couting domains*/
+Counter_domain domain[TABLESIZE];
 
 
 /*_______________/----- FUNCTIONS -----\_______________*/
@@ -43,10 +47,10 @@ int hashcode(char *str){
 
 /*_______________/----- DOMAIN FUNCTIONS -----\_______________*/
 /* It searches in the hashtable domains for the specific hashtable element*/
-Counter_domain search_domain(int i,char name_a[]){
+Counter_domain search_domain(int i,char name_aux[]){
   Counter_domain current = domain[i];
   for(;current!=NULL;current=current->next)
-    if (!strcmp(current->domain, name_a))
+    if (!strcmp(current->domain, name_aux))
       return current;
   return NULL;
 }
@@ -83,10 +87,10 @@ void alloc_domain(int i,char domain_aux[]){
 }
 
 /* It finds the domain by giving a name and decreases one value of the count */
-void decrease_domain(char domain_a[]){
-  int i=hashcode(domain_a);
-  Counter_domain aux=search_domain(i,domain_a);
-  aux->count--;
+void decrease_domain(char domain_aux[]){
+  int i=hashcode(domain_aux);
+  Counter_domain count_aux=search_domain(i,domain_aux);
+  count_aux->count--;
 }
 
 
@@ -115,94 +119,94 @@ contacts create_contact(char name[], char email[], char phone[]){
 /* Creates and returns a node.
 Also creates a contact that is asocciated with the node */
 link create_node(char name[], char email[], char phone[]){
-  link x = malloc(sizeof(struct node));
-  x->contact = create_contact(name,email,phone);
-  x->next = NULL;
-  x->prev = NULL;
-  return x;
+  link node_aux = malloc(sizeof(struct node));
+  node_aux->contact = create_contact(name,email,phone);
+  node_aux->next = NULL;
+  node_aux->prev = NULL;
+  return node_aux;
 }
 
 /* Function that puts the last node created in the last position
 of the principal list */
-void alloc_node(link x){
+void alloc_node(link node_aux){
   if (head!=NULL){
-    last->next = x;
-    x->prev = last;
-    last=x;
+    last->next = node_aux;
+    node_aux->prev = last;
+    last=node_aux;
     return;
   }
-  head=x, last=head;
+  head=node_aux, last=head;
 }
 
 /* Function that searches what element is the one that I'm looking for in hash */
-hash search_hash(int i, char name_a[]){
+hash search_hash(int i, char name_aux[]){
   hash current = hashtable[i];
   for(;current!=NULL;current=current->next)
-    if (!strcmp(current->node->contact->name, name_a))
+    if (!strcmp(current->node->contact->name, name_aux))
       return current;
   return NULL;
 }
 /* Creates and returns a new hashtable element with node associated to it */
 hash create_hash(link node){
-  hash x = malloc(sizeof(struct Hash));
-  x->node = node;
-  x->next = NULL;
-  x->prev = NULL;
-  return x;
+  hash hash_aux = malloc(sizeof(struct Hash));
+  hash_aux->node = node;
+  hash_aux->next = NULL;
+  hash_aux->prev = NULL;
+  return hash_aux;
 }
 
 /* Allocs memory to guard a new hashtable element, associating with node */
 void alloc_hash(int i, link node){
-  hash x=create_hash(node);
+  hash hash_aux=create_hash(node);
   if (hashtable[i]==NULL)
-    hashtable[i]=x;
+    hashtable[i] = hash_aux;
   else{
-    hashtable[i]->prev = x;
-    x->next=hashtable[i];
-    x->prev=NULL;
-    hashtable[i]=x;
+    hashtable[i]->prev = hash_aux;
+    hash_aux->next = hashtable[i];
+    hash_aux->prev = NULL;
+    hashtable[i] = hash_aux;
   }
 }
 
 
 /*_______________/----- OTHER FUNCTIONS -----\_______________*/
-/* Prints a contact that was given */
+/* Prints the given contact */
 void print_contact(contacts t){
   printf("%s %s@%s %s\n", t->name, t->email, t->domain, t->phone);
 }
 
 /* Prints all contacts in the principal list (Linked list) */
 void list_contact(){
-  link t=head;
-  for (;t!=NULL; t=t->next)
-    print_contact(t->contact);
+  link node_aux=head;
+  for (;node_aux!=NULL; node_aux=node_aux->next)
+    print_contact(node_aux->contact);
 }
 
 /* It changes a email of a contact to the new email given */
-void change_email(contacts aux,char email[]){
+void change_email(contacts contact,char email[]){
   int i=0;
   char*token = strtok(email, "@");
-  aux->email = realloc(aux->email,sizeof(char) * (strlen(token)+1));
-  strcpy(aux->email,token);
+  contact->email = realloc(contact->email,sizeof(char) * (strlen(token)+1));
+  strcpy(contact->email,token);
 
   token = strtok(NULL, "\0");
-  aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
-  strcpy(aux->domain,token);
+  contact->domain = realloc(contact->domain,sizeof(char) * (strlen(token)+1));
+  strcpy(contact->domain,token);
   /* Adds a domain */
-  i=hashcode(aux->domain);
-  alloc_domain(i,aux->domain);
+  i=hashcode(contact->domain);
+  alloc_domain(i,contact->domain);
 }
 
 
 /*_______________/----- FREE FUNCTIONS -----\_______________*/
 /* Function that free all the variables of contact and the node of the contact. */
-void clean_node(link current){
-  free(current->contact->name);
-  free(current->contact->email);
-  free(current->contact->domain);
-  free(current->contact->phone);
-  free(current->contact);
-  free(current);
+void clean_node(link node){
+  free(node->contact->name);
+  free(node->contact->email);
+  free(node->contact->domain);
+  free(node->contact->phone);
+  free(node->contact);
+  free(node);
 }
 
 /* Function that free all nodes in the linked list. It calls the clean function */
@@ -242,29 +246,29 @@ void freeHASH(int i){
 
 /*_______________/----- Remove FUNCTIONS -----\_______________*/
 /* Deletes a Node and all mallocs made in contatcs */
-void deleteNode(link del){
-  if (head != NULL || del != NULL){
-    if (head == del)
-      head = del->next;
-    if (del->next != NULL)
-      del->next->prev = del->prev;
+void deleteNode(link node_del){ /*node to be eliminated*/
+  if (head != NULL || node_del != NULL){
+    if (head == node_del)
+      head = node_del->next;
+    if (node_del->next != NULL)
+      node_del->next->prev = node_del->prev;
     else
-      last=del->prev;
-    if (del->prev != NULL)
-      del->prev->next = del->next;
-    clean_node(del);
+      last=node_del->prev;
+    if (node_del->prev != NULL)
+      node_del->prev->next = node_del->next;
+    clean_node(node_del);
   }
 }
 
 /* Deletes a Hash */
-void deleteHASH(int i, hash del){
-  if (hashtable[i] != NULL || del != NULL){
-    if (hashtable[i] == del)
-      hashtable[i] = del->next;
-    if (del->next != NULL)
-      del->next->prev = del->prev;
-    if (del->prev != NULL)
-      del->prev->next = del->next;
-    free(del);
+void deleteHASH(int i, hash hash_del){
+  if (hashtable[i] != NULL || hash_del != NULL){
+    if (hashtable[i] == hash_del)
+      hashtable[i] = hash_del->next;
+    if (hash_del->next != NULL)
+      hash_del->next->prev = hash_del->prev;
+    if (hash_del->prev != NULL)
+      hash_del->prev->next = hash_del->next;
+    free(hash_del);
   }
 }
