@@ -2,13 +2,15 @@
  * File:  main.c
  * Author:  Nelson Trindade
  * IST Number: 93743
- * Description: Code for a Contact list. It uses linked lists, Hashtables for
-    searching contacts and other for domains.
+ * Description: This is the code of the second project for Introduction to
+  Algorithms and Data Structures. For this project, I used linked lists,
+  Hashtables for searching contacts and other hashtable for domains.
  */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include "functions.h"
+#include "main_functions.h"
 
 
 int main(){
@@ -20,8 +22,8 @@ int main(){
         scanf(" %s %s %s",name,email,phone);
         command_a(name,email,phone);
         break;
-      case 'l':  /*lIST ALL CONTACTS*/
-        list_contact();
+      case 'l':  /*PRINTS ALL CONTACTS*/
+        command_l();
         break;
       case 'p':  /*SEARCHES A CONTACT*/
         scanf(" %s",name);

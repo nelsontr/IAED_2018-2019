@@ -2,7 +2,7 @@
  * File:  main_functions.c
  * Author:  Nelson Trindade
  * IST Number: 93743
- * Description: Principal functions used in switch in main.c.
+ * Description: Principal functions used in the switch of main.c.
  */
 #include <stdio.h>
 #include <string.h>
@@ -12,12 +12,13 @@
 
 /*_______________/----- MAIN FUNCTIONS -----\_______________*/
 
-/* Function that adds a contact, by creating a node in linked list */
+/* Function that adds a contact, by creating a node in the linked list
+and on the hashtable */
 void command_a(char name[], char email[], char phone[]){
-  link node_aux=NULL;
+  link node_aux = NULL;
   int i=hashcode(name);
   if (search_hash(i,name)==NULL){
-    node_aux=create_node(name,email,phone);
+    node_aux = create_node(name,email,phone);
     alloc_node(node_aux);
     alloc_hash(i,node_aux);
   }
@@ -25,11 +26,15 @@ void command_a(char name[], char email[], char phone[]){
     puts("Nome existente.");
 }
 
+/* Prints all elements of the linked list */
+void command_l(){
+  list_contact();
+}
+
 /* Searches and prints the contact that is associated with the name given */
 void command_p(char name[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
-
   if (pos!=NULL)
     print_contact(pos->node->contact);
   else
@@ -40,7 +45,6 @@ void command_p(char name[]){
 void command_r(char name[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
-
   if (pos!=NULL){
     decrease_domain(pos->node->contact->domain);
     deleteNode(pos->node);
@@ -55,7 +59,6 @@ by giving the name of the contact and the new email  */
 void command_e(char name[],char email[]){
   int i=hashcode(name);
   hash pos=search_hash(i, name);
-
   if (pos!=NULL){
     decrease_domain(pos->node->contact->domain);
     change_email(pos->node->contact,email);

@@ -3,9 +3,9 @@
 
 /*_______________/----- CONSTANTS -----\_______________*/
 #define MAX_NAME 1024
-#define MAX_EMAIL 512  /*Both for email and domain*/
+#define MAX_EMAIL 512  /*Bowth for email and domain*/
 #define MAX_PHONE 64
-#define TABLESIZE 1031  /*For Hashtable to search_hash and Domain list*/
+#define TABLESIZE 1031  /*For Hashtable to search_hash and Domain List*/
 
 /*_______________/----- STRUCTURES -----\_______________*/
 typedef struct cont{
@@ -32,7 +32,7 @@ typedef struct email{
 /*_______________/----- PROTOTYPES -----\_______________*/
 void Initializes();
 char* input(char buffer[]);
-int hashcode(char *str);
+int hashcode(char *v);
 Counter_domain search_domain(int i,char name_a[]);
 Counter_domain create_domain(char domain[]);
 void alloc_domain(int i,char domai[]);
@@ -52,11 +52,5 @@ void freeDOM(int i);
 void freeHASH(int i);
 void deleteNode(link del);
 void deleteHASH(int i, hash del);
-void command_a(char name[], char email[], char phone[]);
-void command_p(char name[]);
-void command_r(char name[]);
-void command_e(char name[],char email[]);
-void command_c(char email[]);
-void command_x();
 
 #endif

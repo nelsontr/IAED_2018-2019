@@ -2,7 +2,7 @@
  * File:  functions.c
  * Author:  Nelson Trindade
  * IST Number: 93743
- * Description: Functions used in main.c and main_functions.c
+ * Description: Functions used in main_functions.c
  */
 #include <stdio.h>
 #include <string.h>
@@ -11,9 +11,9 @@
 #include "main_functions.h"
 
 /*___________/----- GLOBAL VARIABLES -----\___________*/
-link head=NULL, last = NULL; /*Principal List, a.k.a. Linked list to contacts*/
+link head = NULL, last = NULL; /*Principal List, a.k.a. Linked list to contacts*/
 hash hashtable[TABLESIZE];  /*For searching reasons*/
-Counter_domain domain[TABLESIZE];  /*For giving the number of domains*/
+Counter_domain domain[TABLESIZE];  /*For couting domains*/
 
 
 /*_______________/----- FUNCTIONS -----\_______________*/
@@ -63,15 +63,15 @@ Counter_domain create_domain(char domain[]){
 
 /* Allocs a domain, witch means that it chooses were to create or were
 to add 1 to the counter of a domain */
-void alloc_domain(int i,char domai[]){
+void alloc_domain(int i,char domain_aux[]){
   Counter_domain aux=NULL;
   if (domain[i]==NULL)  /* If it's the first element on the hashtable */
-    domain[i]=create_domain(domai);
+    domain[i]=create_domain(domain_aux);
   else {
-    aux=search_domain(i,domai);
+    aux=search_domain(i,domain_aux);
     if (aux==NULL){ /* If it's not the first element, and there is not one
                     hashtable element for that domain */
-      aux=create_domain(domai);
+      aux=create_domain(domain_aux);
       domain[i]->prev = aux;
       aux->next=domain[i];
       aux->prev=NULL;
@@ -188,7 +188,7 @@ void change_email(contacts aux,char email[]){
   token = strtok(NULL, "\0");
   aux->domain = realloc(aux->domain,sizeof(char) * (strlen(token)+1));
   strcpy(aux->domain,token);
-
+  /* Adds a domain */
   i=hashcode(aux->domain);
   alloc_domain(i,aux->domain);
 }
